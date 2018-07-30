@@ -1,0 +1,48 @@
+{
+  "name": "lytics-js",
+  "version": "0.0.5",
+  "description": "Work with the Lytics REST API using JavaScript",
+  "main": "./dist/lytics.js",
+  "files": [
+    "/dist"
+  ],
+  "bin": {
+    "lytics": "./dist/cli.js"
+  },
+  "dependencies": {
+    "axios": "^0.18.0",
+    "chokidar": "^2.0.4",
+    "commander": "^2.16.0",
+    "csvdata": "^1.7.0",
+    "jsome": "^2.5.0",
+    "query-string": "^6.1.0",
+    "winston": "^3.0.0"
+  },
+  "devDependencies": {
+    "@types/chai": "^4.1.4",
+    "@types/chokidar": "^1.7.5",
+    "@types/commander": "^2.12.2",
+    "@types/mocha": "^5.2.5",
+    "@types/node": "^10.5.4",
+    "@types/query-string": "^6.1.0",
+    "@types/winston": "^2.3.9",
+    "chai": "^4.1.2",
+    "mocha": "^5.2.0",
+    "ts-node": "^7.0.0",
+    "typescript": "^2.9.2"
+  },
+  "scripts": {
+    "build": "tsc",
+    "test": "mocha -r ts-node/register src/**/*.spec.ts"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/lytics/lytics-js.git"
+  },
+  "author": "Adam Conn <adam.conn@lytics.com>",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/lytics/lytics-js/issues"
+  },
+  "homepage": "https://github.com/lytics/lytics-js#readme"
+}
