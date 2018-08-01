@@ -127,3 +127,32 @@ export class TableSchemaFieldInfoTermCount {
     value: string | undefined;
     count: number = 0;
 }
+
+export class Query {
+    alias: string|undefined;
+    by_fields: string[] = [];
+    created: string|undefined;
+    description: string|undefined;
+    disabled: boolean = false;
+    fields: QueryField[] = [];
+    from: string|undefined;
+    id: string|undefined;
+    into: string|undefined;
+    keyword: string|undefined;
+    query_type: string|undefined;
+    table: string|undefined;
+    text: string|undefined;
+    updated: string|undefined;
+
+}
+export class QueryField {
+    as: string|undefined;
+    froms: string[] = [];
+    hidden: boolean = false;
+    identities: string[] = [];
+    is_by: boolean = false;
+    longdesc: string|undefined;
+    private: boolean = false;
+    shortdesc: string|undefined;
+    type: string|undefined;
+}

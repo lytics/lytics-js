@@ -1,7 +1,7 @@
 'use strict';
 import axios, { AxiosRequestConfig, } from 'axios';
 import qs = require('query-string');
-import { LyticsAccount, DataStream, DataStreamField, TableSchema, TableSchemaField, TableSchemaFieldInfo } from './types';
+import { LyticsAccount, DataStream, DataStreamField, TableSchema, TableSchemaField, TableSchemaFieldInfo, Query } from './types';
 import { isArray } from 'util';
 
 const base_url = 'https://api.lytics.io';
@@ -16,16 +16,23 @@ export class LyticsClient {
         };
     }
     private async doRequest(config: AxiosRequestConfig, dataHandler?: (data: string) => any): Promise<any> {
+        var wasSuccess: boolean = false;
         const response = await axios.request(config);
         const data = response.data;
         if (data.status === 200) {
             if (data.message === 'Not Found') {
                 return Promise.resolve(undefined);
             }
-            if (data.message === 'success') {
-                const data2 = dataHandler ? dataHandler(data) : data.data;
-                return Promise.resolve(data2);
+            if (data.message === 'success' || data.message.length === 0) {
+                wasSuccess = true;
             }
+        }
+        if (!wasSuccess && data.status === 'success') {
+            wasSuccess = true;
+        }
+        if (wasSuccess) {
+            const data2 = dataHandler ? dataHandler(data) : data.data;
+            return Promise.resolve(data2);
         }
         return Promise.reject(data);
     }
@@ -127,6 +134,54 @@ export class LyticsClient {
                 }
             });
         return Promise.resolve(data);
+    }
+
+    async getQueries(): Promise<Query[]> {
+        const url = `${base_url}/api/query`;
+        return this.doGet(url);
+    }
+    async getQuery(alias: string): Promise<Query | undefined> {
+        const url = `${base_url}/api/query/${alias}`;
+        const data = await this.doGet(url)
+            .catch(err => {
+                if (err.response.status === 404) {
+                    return;
+                }
+                throw err;
+            });
+        return Promise.resolve(data);
+    }
+    async upsertQuery(lql: string) {
+        const url = `${base_url}/api/query`;
+        return this.doPost(url, lql);
+    }
+    async deleteQuery(alias: string): Promise<boolean> {
+        const url = `${base_url}/api/query/${alias}`;
+        const config = {
+            url: url,
+            method: 'delete',
+            headers: this.headers
+        };
+        const response = await axios.request(config);
+        if (response.status === 204) {
+            return Promise.resolve(true);
+        }
+        return Promise.resolve(false);
+    }
+    async getQueriesGroupedByTable(): Promise<Map<string, Query[]>> {
+        const queries = await this.getQueries();
+        let map: Map<string, Query[]> = new Map();
+        for (let i = 0; i < queries.length; i++) {
+            let query = queries[i];
+            const table = query.table!;
+            let values = map.get(table);
+            if (!values) {
+                values = [];
+                map.set(table, values);
+            }
+            values.push(query);
+        }
+        return Promise.resolve(map);
     }
 
     async testQuery(lql: string, record: any): Promise<any> {

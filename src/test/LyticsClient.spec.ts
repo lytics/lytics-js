@@ -172,6 +172,65 @@ describe('getEntity', function() {
     });
 });
 
+describe('getQueries', function () {
+    it('should return an array of queries', async function () {
+        const lytics = new LyticsClient(apikey);
+        var queries = await lytics.getQueries();
+        assert.isDefined(queries);
+        assert.isNotEmpty(queries);
+    });
+});
+
+describe('getQuery', function () {
+    it('should return undefined when a query that does not exist is specified', async function () {
+        const lytics = new LyticsClient(apikey);
+        var query = await lytics.getQuery('xxx');
+        assert.isUndefined(query);
+    });
+    it('should return a query when a query that exists is specified', async function () {
+        const lytics = new LyticsClient(apikey);
+        var query = await lytics.getQuery('user_web_default');
+        assert.isDefined(query);
+    });
+});
+
+describe('upsertQuery', function () {
+    it('should throw an error when invalid LQL is specified', async function () {
+        const lytics = new LyticsClient(apikey);
+        var wasThrown = false;
+        try {
+            await lytics.upsertQuery('xxx');
+        }
+        catch(err) {
+            wasThrown = true;
+        }
+        assert.isTrue(wasThrown);
+    });
+    it('should return when valid LQL is specified', async function () {
+        const lytics = new LyticsClient(apikey);
+        const alias = '_DELETE_ME_unit_test';
+        const lql = 'SELECT email FROM test_stream INTO user BY email ALIAS aaa';
+        let query = await lytics.getQuery(alias);
+        assert.isUndefined(query, 'The test query already exists. The test cannot continue.');
+        await lytics.upsertQuery(lql);
+        query = await lytics.getQuery(alias);
+        assert.isDefined(query);
+        assert.equal(query!.alias, alias);
+        assert.equal(query!.text, lql);
+        const wasDeleted = await lytics.deleteQuery(alias);
+        assert.isTrue(wasDeleted);
+    });
+});
+
+describe('getQueriesGroupedByTable', function () {
+    it('gets a map of the queries', async function () {
+        const lytics = new LyticsClient(apikey);
+        var queries = await lytics.getQueriesGroupedByTable();
+        assert.isDefined(queries);
+        assert.isNotEmpty(queries.get('user'));
+    });
+});
+
 describe('testQuery', function () {
     it('evaluates properly when valid LQL and data are provided', async function () {
         const lytics = new LyticsClient(apikey);
