@@ -86,3 +86,44 @@ export class DataStream {
     recent_events: any[] = [];
     stream: string | undefined;
 }
+
+export class TableSchemaField {
+    as: string | undefined;
+    froms: string[] = [];
+    hidden: boolean = false;
+    identities: string[] = [];
+    is_by: boolean = false;
+    longdesc: string | undefined;
+    private: boolean = false;
+    shortdesc: string | undefined;
+    type: string | undefined;
+}
+export class TableSchema {
+    by_fields: string[] = [];
+    columns: TableSchemaField[] = [];
+    name: string | undefined;
+};
+export class TableSchemaFieldInfo {
+    approx_cardinality: number = 0;
+    ents_absent: number = 0;
+    ents_present: number = 0;
+    field: string | undefined;
+    more_terms: boolean = false;
+    terms_counts: any;
+    static getTermCounts = (obj: any): TableSchemaFieldInfoTermCount[] => {
+        const counts: TableSchemaFieldInfoTermCount[] = [];
+        if (obj) {
+            for (let key in obj.terms_counts) {
+                const count = new TableSchemaFieldInfoTermCount();
+                count.value = key;
+                count.count = obj.terms_counts[key];
+                counts.push(count);
+            }
+        }
+        return counts;
+    }
+};
+export class TableSchemaFieldInfoTermCount {
+    value: string | undefined;
+    count: number = 0;
+}

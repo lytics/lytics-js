@@ -1,5 +1,6 @@
 import { LyticsClient } from '../LyticsClient';
 import { assert } from 'chai';
+import { TableSchemaFieldInfo } from '../types';
 
 const apikey:string = '';
 const aid:number = 0;
@@ -16,22 +17,22 @@ describe('getAccounts', function () {
     it('should return an array of accounts', async function () {
         const lytics = new LyticsClient(apikey);
         var accounts = await lytics.getAccounts();
-        assert.isNotNull(accounts);
+        assert.isDefined(accounts);
         assert.equal(accounts.length, 1);
         assert.equal(accounts[0].aid, aid);
     });
 });
 
 describe('getAccount', function () {
-    it('should return null when a mismatched account id is used', async function () {
+    it('should return undefined when a mismatched account id is used', async function () {
         const lytics = new LyticsClient(apikey);
         var account = await lytics.getAccount(123);
-        assert.isNull(account);
+        assert.isUndefined(account);
     });
     it('should return an account when a matched account id is used', async function () {
         const lytics = new LyticsClient(apikey);
         var account = await lytics.getAccount(aid);
-        assert.isNotNull(account);
+        assert.isDefined(account);
         assert.equal(account!.aid, aid);
     });
 });
@@ -40,21 +41,134 @@ describe('getStreams', function () {
     it('should return an array of data streams', async function () {
         const lytics = new LyticsClient(apikey);
         var streams = await lytics.getStreams();
-        assert.isNotNull(streams);
+        assert.isDefined(streams);
         assert.isTrue(streams.length >= 2);
-        assert.isNotNull(streams.find(s => s.stream == 'default'));
-        assert.isNotNull(streams.find(s => s.stream == 'lytics_content_enrich'));
+        assert.isDefined(streams.find(s => s.stream == 'default'));
+        assert.isDefined(streams.find(s => s.stream == 'lytics_content_enrich'));
     });
-    it('should return null when a data stream that does not exist is specified', async function () {
+    it('should return undefined when a data stream that does not exist is specified', async function () {
         const lytics = new LyticsClient(apikey);
-        var stream = await lytics.getStream('xxx');
-        assert.isNull(stream);
+        var stream = await lytics.getStream('87y789fdfn');
+        assert.isUndefined(stream);
     });
     it('should return a data stream', async function () {
         const lytics = new LyticsClient(apikey);
         var stream = await lytics.getStream('default');
-        assert.isNotNull(stream);
+        assert.isDefined(stream);
         assert.equal(stream!.stream, 'default');
+    });
+});
+
+describe('getStreamField', function () {
+    it('should return a field from the data stream', async function () {
+        const lytics = new LyticsClient(apikey);
+        var field = await lytics.getStreamField('default', '_uid');
+        assert.isDefined(field);
+        assert.equal(field!.name, '_uid');
+    });
+    it('should return undefined when a data stream that does not exist is specified', async function () {
+        const lytics = new LyticsClient(apikey);
+        var field = await lytics.getStreamField('3t4w4tsg', '_uid');
+        assert.isUndefined(field);
+    });
+    it('should return undefined when a field that does not exist in the data stream is specified', async function () {
+        const lytics = new LyticsClient(apikey);
+        var field = await lytics.getStreamField('default', 'dfgdsrgt43');
+        assert.isUndefined(field);
+    });
+});
+
+describe('getTableSchema', function() {
+    it('should return undefined when a table that does not exist is specified', async function() {
+        const lytics = new LyticsClient(apikey);
+        var schema = await lytics.getTableSchema('xxx');
+        assert.isUndefined(schema);
+    });
+    it('should return an object when the user table is specified', async function() {
+        const lytics = new LyticsClient(apikey);
+        var schema = await lytics.getTableSchema('user');
+        assert.isDefined(schema);
+        assert.equal(schema!.name, 'user');
+        assert.isTrue(schema!.columns.length > 0);
+        assert.isTrue(schema!.by_fields.length > 0);
+    });
+});
+
+describe('getTableSchemaFieldInfo', function() {
+    it('should return undefined when a table that does not exist is specified', async function() {
+        const lytics = new LyticsClient(apikey);
+        var info = await lytics.getTableSchemaFieldInfo('xxx', 'yyy');
+        assert.isUndefined(info);
+    });
+    it('should return undefined when the table exists but the field does not', async function() {
+        const lytics = new LyticsClient(apikey);
+        var info = await lytics.getTableSchemaFieldInfo('user', 'yyy');
+        assert.isUndefined(info);
+    });
+    it('should return an object when the user table and email field are specified', async function() {
+        const lytics = new LyticsClient(apikey);
+        const info = await lytics.getTableSchemaFieldInfo('user', 'email');
+        assert.isDefined(info);
+        assert.equal(info!.field, 'email');
+        const counts = TableSchemaFieldInfo.getTermCounts(info);
+        assert.isNotEmpty(counts);
+    });
+});
+
+describe('getTableSchemaFieldInfo', function() {
+    it('should return undefined when a table that does not exist is specified', async function() {
+        const lytics = new LyticsClient(apikey);
+        var info = await lytics.getTableSchemaFieldInfo('xxx', 'yyy');
+        assert.isUndefined(info);
+    });
+    it('should return undefined when the table exists but the field does not', async function() {
+        const lytics = new LyticsClient(apikey);
+        var info = await lytics.getTableSchemaFieldInfo('user', 'yyy');
+        assert.isUndefined(info);
+    });
+    it('should return an object when the user table is specified', async function() {
+        const lytics = new LyticsClient(apikey);
+        const info = await lytics.getTableSchemaFieldInfo('user', 'email');
+        assert.isDefined(info);
+        assert.equal(info!.field, 'email');
+        const counts = TableSchemaFieldInfo.getTermCounts(info);
+        assert.isNotEmpty(counts);
+    });
+});
+
+describe('getEntity', function() {
+    it('should return undefined when a table that does not exist is specified', async function() {
+        const lytics = new LyticsClient(apikey);
+        var entity = await lytics.getEntity('xxx', 'yyy', 'zzz');
+        assert.isUndefined(entity);
+    });
+    it('should return undefined when the table exists but the field does not', async function() {
+        const lytics = new LyticsClient(apikey);
+        var entity = await lytics.getEntity('user', 'yyy', 'zzz');
+        assert.isUndefined(entity);
+    });
+    it('should return undefined when the table and field exist but the value does not match an entity', async function() {
+        const lytics = new LyticsClient(apikey);
+        var entity = await lytics.getEntity('user', 'email', 'zzz');
+        assert.isUndefined(entity);
+    });
+    it('should return an object when the table, field and value match an existing entity', async function() {
+        const lytics = new LyticsClient(apikey);
+        var entity = await lytics.getEntity('user', 'email', 'jeff.brown@lytics.com');
+        assert.isDefined(entity);
+        assert.equal(entity!.email, 'jeff.brown@lytics.com');
+    });
+    it('should return an object when wait is true', async function() {
+        const lytics = new LyticsClient(apikey);
+        var entity = await lytics.getEntity('user', 'email', 'jeff.brown@lytics.com', true);
+        assert.isDefined(entity);
+        assert.equal(entity!.email, 'jeff.brown@lytics.com');
+    });
+    it('should return an object when wait is false', async function() {
+        const lytics = new LyticsClient(apikey);
+        var entity = await lytics.getEntity('user', 'email', 'jeff.brown@lytics.com', false);
+        assert.isDefined(entity);
+        assert.equal(entity!.email, 'jeff.brown@lytics.com');
     });
 });
 
@@ -75,7 +189,7 @@ describe('testQuery', function () {
             `;
         const data = { first: "Adam", last: "Conn", email: "adam.conn@lytics.com" };
         const response = await lytics.testQuery(lql, data);
-        assert.isNotNull(response);
+        assert.isDefined(response);
         assert.equal(response.first_name, "Adam");
         assert.equal(response.last_name, "Conn");
         assert.equal(response.email, "adam.conn@lytics.com");
