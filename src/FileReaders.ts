@@ -1,4 +1,7 @@
+import { isArray } from "util";
+
 'use strict';
+const fs = require('fs');
 const csvdata = require('csvdata');
 
 export interface FileReader {
@@ -28,8 +31,10 @@ export class CsvFileReader implements FileReader {
 }
 export class JsonFileReader implements FileReader {
     async convert(filePath: string, maxcount: number): Promise<any[]> {
-        //TODO: support file with a single object
-        //TODO: support file with an array of objects
-        throw new Error("Method not implemented.");
+        const obj = JSON.parse(fs.readFileSync(filePath));
+        if (isArray(obj)) {
+            return obj;
+        }
+        return [obj];
     }
 }
