@@ -107,9 +107,9 @@ describe('getTableSchemaFieldInfo', function () {
     });
     it('should return an object when the user table and email field are specified', async function () {
         const lytics = new LyticsClient(apikey);
-        const info = await lytics.getTableSchemaFieldInfo('user', 'email');
+        const info = await lytics.getTableSchemaFieldInfo('user', '_uid');
         assert.isDefined(info);
-        assert.equal(info!.field, 'email');
+        assert.equal(info!.field, '_uid');
         const counts = TableSchemaFieldInfo.getTermCounts(info);
         assert.isNotEmpty(counts);
     });
@@ -126,11 +126,11 @@ describe('getTableSchemaFieldInfo', function () {
         var info = await lytics.getTableSchemaFieldInfo('user', 'yyy');
         assert.isUndefined(info);
     });
-    it('should return an object when the user table is specified', async function () {
+    it('should return a field info object when the user table is specified', async function () {
         const lytics = new LyticsClient(apikey);
-        const info = await lytics.getTableSchemaFieldInfo('user', 'email');
+        const info = await lytics.getTableSchemaFieldInfo('user', '_uid');
         assert.isDefined(info);
-        assert.equal(info!.field, 'email');
+        assert.equal(info!.field, '_uid');
         const counts = TableSchemaFieldInfo.getTermCounts(info);
         assert.isNotEmpty(counts);
     });
@@ -154,21 +154,21 @@ describe('getEntity', function () {
     });
     it('should return an object when the table, field and value match an existing entity', async function () {
         const lytics = new LyticsClient(apikey);
-        var entity = await lytics.getEntity('user', 'email', 'jeff.brown@lytics.com');
+        var entity = await lytics.getEntity('user', '_uid', '114940.99527438209');
         assert.isDefined(entity);
-        assert.equal(entity!.email, 'jeff.brown@lytics.com');
+        assert.equal(entity!._uid, '114940.99527438209');
     });
     it('should return an object when wait is true', async function () {
         const lytics = new LyticsClient(apikey);
-        var entity = await lytics.getEntity('user', 'email', 'jeff.brown@lytics.com', true);
+        var entity = await lytics.getEntity('user', '_uid', '114940.99527438209', true);
         assert.isDefined(entity);
-        assert.equal(entity!.email, 'jeff.brown@lytics.com');
+        assert.equal(entity!._uid, '114940.99527438209');
     });
     it('should return an object when wait is false', async function () {
         const lytics = new LyticsClient(apikey);
-        var entity = await lytics.getEntity('user', 'email', 'jeff.brown@lytics.com', false);
+        var entity = await lytics.getEntity('user', '_uid', '114940.99527438209', false);
         assert.isDefined(entity);
-        assert.equal(entity!.email, 'jeff.brown@lytics.com');
+        assert.equal(entity!._uid, '114940.99527438209');
     });
 });
 
@@ -208,11 +208,14 @@ describe('upsertQuery', function () {
     });
     it('should return when valid LQL is specified', async function () {
         const lytics = new LyticsClient(apikey);
-        const alias = '_DELETE_ME_unit_test';
-        const lql = 'SELECT email FROM test_stream INTO user BY email ALIAS aaa';
+        const alias = '_DELETE_me_unit_test'.toLowerCase();
+        const lql = `SELECT email FROM test_stream INTO user BY email ALIAS ${alias}`;
         let query = await lytics.getQuery(alias);
         assert.isUndefined(query, 'The test query already exists. The test cannot continue.');
-        await lytics.upsertQuery(lql);
+        var query2 = await lytics.upsertQuery(lql);
+        assert.isDefined(query2);
+        assert.isNotEmpty(query2);
+        assert.equal(query2[0].alias, alias);
         query = await lytics.getQuery(alias);
         assert.isDefined(query);
         assert.equal(query!.alias, alias);
@@ -261,5 +264,67 @@ describe('collect', function () {
         const result = await lytics.collect('test-stream-unit-test', { name: 'aaa' }) as CollectResultInfo;
         assert.isDefined(result);
         assert.equal(result.message_count, 1);
+    });
+});
+
+describe('getSegmentCollection', function () {
+    it('should get all segments when no parameter is specified', async function () {
+        const lytics = new LyticsClient(apikey);
+        const segments = await lytics.getSegmentCollection();
+        assert.isDefined(segments);
+        assert.isDefined(segments.audiences);
+        assert.isDefined(segments.characteristics);
+        assert.isDefined(segments.unidentified);
+    });
+    it('should get 1 segment when only 1 segment is specified', async function () {
+        const lytics = new LyticsClient(apikey);
+        const segments = await lytics.getSegmentCollection(['fcfb11e24b93964cba3aa2527ab913a3']);
+        assert.isDefined(segments);
+        assert.isDefined(segments.audiences);
+        assert.equal(segments.audiences.length, 1);
+        assert.isDefined(segments.characteristics);
+        assert.equal(segments.characteristics.length, 0);
+        assert.isDefined(segments.unidentified);
+        assert.equal(segments.unidentified.length, 0);
+    });
+    it('should get 0 segment when a segment is specified that does not exist', async function () {
+        const lytics = new LyticsClient(apikey);
+        const segments = await lytics.getSegmentCollection(['aaaaa']);
+        assert.isDefined(segments);
+        assert.isDefined(segments.audiences);
+        assert.equal(segments.audiences.length, 0);
+        assert.isDefined(segments.characteristics);
+        assert.equal(segments.characteristics.length, 0);
+        assert.isDefined(segments.unidentified);
+        assert.equal(segments.unidentified.length, 0);
+    });
+});
+
+describe('getSegments', function () {
+    it('should get all segments', async function () {
+        const lytics = new LyticsClient(apikey);
+        const segments = await lytics.getSegments();
+        assert.isDefined(segments);
+        assert.isTrue(segments.length > 0);
+    });
+});
+
+describe('getSegment', function () {
+    it('should get undefined is the value specified does not match an existing segment', async function () {
+        const lytics = new LyticsClient(apikey);
+        const segment = await lytics.getSegment('asdasd');
+        assert.isUndefined(segment);
+    });
+    it('should get the segment by slug', async function () {
+        const lytics = new LyticsClient(apikey);
+        const segment = await lytics.getSegment('all');
+        assert.isDefined(segment);
+        assert.equal(segment!.slug_name, 'all');
+    });
+    it('should get the segment by id', async function () {
+        const lytics = new LyticsClient(apikey);
+        const segment = await lytics.getSegment('fcfb11e24b93964cba3aa2527ab913a3');
+        assert.isDefined(segment);
+        assert.equal(segment!.id, 'fcfb11e24b93964cba3aa2527ab913a3');
     });
 });
