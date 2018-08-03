@@ -165,3 +165,35 @@ export class CollectResultInfo {
     timestamp_field: string | undefined;
     filename: string | undefined;
 }
+export class SegmentCollection {
+    audiences:Segment[] = [];
+    characteristics:Segment[] = [];
+    unidentified:Segment[] = [];
+}
+export class Segment {
+    account_id: string|undefined;
+    aid: number=0;
+    ast: any;
+    author_id: string|undefined;
+    created: string|undefined;
+    datemath_calc: boolean=false;
+    deleted: boolean=false;
+    description: string|undefined;
+    forward_datemath: boolean=false;
+    id: string|undefined;
+    invalid: boolean=false;
+    invalid_reason: string|undefined;
+    is_public: boolean=false;
+    kind: string|undefined;
+    name: string|undefined;
+    public_name: string|undefined;
+    save_hist: boolean=false;
+    schedule_exit: boolean=false;
+    segment_ql: string|undefined;
+    short_id: string|undefined;
+    slug_name: string|undefined;
+    table: string|undefined;
+    tags: string[] = [];
+    updated: string|undefined;
+};
+

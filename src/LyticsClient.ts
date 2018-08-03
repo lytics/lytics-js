@@ -1,7 +1,7 @@
 'use strict';
 import axios, { AxiosRequestConfig, } from 'axios';
 import qs = require('query-string');
-import { LyticsAccount, DataStream, DataStreamField, TableSchema, TableSchemaField, TableSchemaFieldInfo, Query, CollectResultInfo } from './types';
+import { LyticsAccount, DataStream, DataStreamField, TableSchema, TableSchemaField, TableSchemaFieldInfo, Query, CollectResultInfo, SegmentCollection, Segment } from './types';
 import { isArray } from 'util';
 
 const base_url = 'https://api.lytics.io';
@@ -78,6 +78,9 @@ export class LyticsClient {
         return this.doGet(url);
     }
     async getStream(name: string): Promise<DataStream | undefined> {
+        if (this.isNullOrWhitespace(name)) {
+            throw new Error('Required parameter is missing.');
+        }
         const streams = await this.getStreams();
         const stream = streams.find(s => s.stream === name);
         if (!stream) {
@@ -86,6 +89,9 @@ export class LyticsClient {
         return Promise.resolve(stream);
     }
     async getStreamField(streamName: string, fieldName: string): Promise<DataStreamField | undefined> {
+        if (this.isNullOrWhitespace(streamName) || this.isNullOrWhitespace(fieldName)) {
+            throw new Error('Required parameter is missing.');
+        }
         const streams = await this.getStreams();
         const stream = streams.find(stream => stream.stream === streamName);
         if (stream) {
@@ -97,6 +103,9 @@ export class LyticsClient {
         return Promise.resolve(undefined);
     }
     async getTableSchema(tableName: string): Promise<TableSchema | undefined> {
+        if (this.isNullOrWhitespace(tableName)) {
+            throw new Error('Required parameter is missing.');
+        }
         const url = `${base_url}/api/schema/${tableName}`;
         const data = await this.doGet(url);
         if (Object.keys(data).length == 0) {
@@ -105,6 +114,9 @@ export class LyticsClient {
         return Promise.resolve(data);
     }
     async getTableSchemaFieldInfo(tableName: string, fieldName: string): Promise<TableSchemaFieldInfo | undefined> {
+        if (this.isNullOrWhitespace(tableName) || this.isNullOrWhitespace(fieldName)) {
+            throw new Error('Required parameter is missing.');
+        }        
         const url = `${base_url}/api/schema/${tableName}/fieldinfo?fields=${fieldName}`;
         const data = await this.doGet(url)
             .catch(err => {
@@ -125,6 +137,9 @@ export class LyticsClient {
         return Promise.resolve(data.fields[0]);
     }
     async getEntity(tableName: string, fieldName: string, fieldValue: any, wait: boolean = false): Promise<any> {
+        if (this.isNullOrWhitespace(tableName) || this.isNullOrWhitespace(fieldName) || !fieldValue) {
+            throw new Error('Required parameter is missing.');
+        }
         const url = `${base_url}/api/entity/${tableName}/${fieldName}/${fieldValue}?wait=${wait}`;
         const data = await this.doGet(url)
             .catch(err => {
@@ -141,6 +156,9 @@ export class LyticsClient {
         return this.doGet(url);
     }
     async getQuery(alias: string): Promise<Query | undefined> {
+        if (this.isNullOrWhitespace(alias)) {
+            throw new Error('Required parameter is missing.');
+        }
         const url = `${base_url}/api/query/${alias}`;
         const data = await this.doGet(url)
             .catch(err => {
@@ -151,11 +169,17 @@ export class LyticsClient {
             });
         return Promise.resolve(data);
     }
-    async upsertQuery(lql: string) {
+    async upsertQuery(lql: string): Promise<Query[]> {
+        if (this.isNullOrWhitespace(lql)) {
+            throw new Error('Required parameter is missing.');
+        }
         const url = `${base_url}/api/query`;
         return this.doPost(url, lql);
     }
     async deleteQuery(alias: string): Promise<boolean> {
+        if (this.isNullOrWhitespace(alias)) {
+            throw new Error('Required parameter is missing.');
+        }
         const url = `${base_url}/api/query/${alias}`;
         const config = {
             url: url,
@@ -185,14 +209,85 @@ export class LyticsClient {
     }
 
     async testQuery(lql: string, record: any): Promise<any> {
+        if (this.isNullOrWhitespace(lql) || !record) {
+            throw new Error('Required parameter is missing.');
+        }
         const params = qs.stringify(record);
         const url = `${base_url}/api/query/_test?${params}`;
         return this.doPost(url, lql);
     }
 
     async collect(stream: string, data:any): Promise<CollectResultInfo|undefined> {
+        if (this.isNullOrWhitespace(stream) || !data) {
+            throw new Error('Required parameter is missing.');
+        }
         const url = `${base_url}/collect/json/${stream}`;
         const result = await this.doPost(url, data);
         return Promise.resolve(result);
+    }
+    async getSegments():Promise<Segment[]> {
+        const url = `${base_url}/api/segment`;
+        const segments = await this.doGet(url) as Segment[];
+        if (!segments) {
+            throw new Error('An array of segments was expected.');
+        }
+        segments.sort(this.compareByNameProperty);
+        return Promise.resolve(segments);
+    }
+    async getSegment(idOrSlug:string):Promise<Segment|undefined> {
+        if (this.isNullOrWhitespace(idOrSlug)) {
+            throw new Error('Required parameter is missing.');
+        }
+        const url = `${base_url}/api/segment/${idOrSlug}`;
+        const segment = await this.doGet(url)
+            .catch(err => {
+            if (err.response.status === 404) {
+                return;
+            }
+            throw err;
+        });
+        return Promise.resolve(segment);
+    }
+    async getSegmentCollection(ids?:string[]):Promise<SegmentCollection> {
+        const col = new SegmentCollection();
+        const url = `${base_url}/api/segment`;
+        const segments = await this.doGet(url) as Segment[];
+        if (!segments) {
+            throw new Error('An array of segments was expected.');
+        }
+        for (let i = 0; i < segments.length; i++) {
+            const segment = segments[i];
+            if (ids && ids.indexOf(segment.id!) === -1) {
+                continue;
+            }
+            let target: Segment[] = col.unidentified;
+            switch (segment.kind) {
+                case 'segment':
+                    target = col.audiences;
+                    break;
+                case 'aspect':
+                    target = col.characteristics;
+                    break;
+            }
+            if (target) {
+                target.push(segment);
+            }
+        }
+        col.characteristics.sort(this.compareByNameProperty);
+        col.audiences.sort(this.compareByNameProperty);
+        col.unidentified.sort(this.compareByNameProperty);
+        return Promise.resolve(col);
+    }
+    private compareByNameProperty(a: any, b: any): number {
+        if (a.name < b.name) {
+            return -1;
+        }
+        if (a.name > b.name) {
+            return 1;
+        }
+        return 0;
+    }
+    private isNullOrWhitespace(value?:string):boolean {
+        return (!value || value.trim().length == 0);
     }
 }
