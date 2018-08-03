@@ -129,30 +129,39 @@ export class TableSchemaFieldInfoTermCount {
 }
 
 export class Query {
-    alias: string|undefined;
+    alias: string | undefined;
     by_fields: string[] = [];
-    created: string|undefined;
-    description: string|undefined;
+    created: string | undefined;
+    description: string | undefined;
     disabled: boolean = false;
     fields: QueryField[] = [];
-    from: string|undefined;
-    id: string|undefined;
-    into: string|undefined;
-    keyword: string|undefined;
-    query_type: string|undefined;
-    table: string|undefined;
-    text: string|undefined;
-    updated: string|undefined;
+    from: string | undefined;
+    id: string | undefined;
+    into: string | undefined;
+    keyword: string | undefined;
+    query_type: string | undefined;
+    table: string | undefined;
+    text: string | undefined;
+    updated: string | undefined;
 
 }
 export class QueryField {
-    as: string|undefined;
+    as: string | undefined;
     froms: string[] = [];
     hidden: boolean = false;
     identities: string[] = [];
     is_by: boolean = false;
-    longdesc: string|undefined;
+    longdesc: string | undefined;
     private: boolean = false;
-    shortdesc: string|undefined;
-    type: string|undefined;
+    shortdesc: string | undefined;
+    type: string | undefined;
+}
+export class CollectResultInfo {
+    message_count: number = 0;
+    rejected_count: number = 0;
+    "content-type": string | undefined;
+    droperrors: boolean = false;
+    dryrun: boolean = false;
+    timestamp_field: string | undefined;
+    filename: string | undefined;
 }

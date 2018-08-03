@@ -1,7 +1,7 @@
 'use strict';
 import axios, { AxiosRequestConfig, } from 'axios';
 import qs = require('query-string');
-import { LyticsAccount, DataStream, DataStreamField, TableSchema, TableSchemaField, TableSchemaFieldInfo, Query } from './types';
+import { LyticsAccount, DataStream, DataStreamField, TableSchema, TableSchemaField, TableSchemaFieldInfo, Query, CollectResultInfo } from './types';
 import { isArray } from 'util';
 
 const base_url = 'https://api.lytics.io';
@@ -190,12 +190,9 @@ export class LyticsClient {
         return this.doPost(url, lql);
     }
 
-    async collect(stream: string, data:any): Promise<any> {
+    async collect(stream: string, data:any): Promise<CollectResultInfo|undefined> {
         const url = `${base_url}/collect/json/${stream}`;
         const result = await this.doPost(url, data);
-        if (result.rejected_count > 0) {
-            return Promise.reject(result);
-        }
-        return Promise.resolve();
+        return Promise.resolve(result);
     }
 }

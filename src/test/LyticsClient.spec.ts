@@ -1,6 +1,6 @@
 import { LyticsClient } from '../LyticsClient';
 import { assert } from 'chai';
-import { TableSchemaFieldInfo } from '../types';
+import { TableSchemaFieldInfo, CollectResultInfo } from '../types';
 
 const apikey: string = '';
 const aid: number = 0;
@@ -258,6 +258,8 @@ describe('testQuery', function () {
 describe('collect', function () {
     it('should not throw an error when data is written to a stream', async function () {
         const lytics = new LyticsClient(apikey);
-        await lytics.collect('test-stream-unit-test', { name: 'aaa' });
+        const result = await lytics.collect('test-stream-unit-test', { name: 'aaa' }) as CollectResultInfo;
+        assert.isDefined(result);
+        assert.equal(result.message_count, 1);
     });
 });
