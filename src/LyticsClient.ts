@@ -189,4 +189,13 @@ export class LyticsClient {
         const url = `${base_url}/api/query/_test?${params}`;
         return this.doPost(url, lql);
     }
+
+    async collect(stream: string, data:any): Promise<any> {
+        const url = `${base_url}/collect/json/${stream}`;
+        const result = await this.doPost(url, data);
+        if (result.rejected_count > 0) {
+            return Promise.reject(result);
+        }
+        return Promise.resolve();
+    }
 }
