@@ -234,6 +234,17 @@ describe('getQueriesGroupedByTable', function () {
     });
 });
 
+describe('toLql', function () {
+    it('generates LQL when text is provided', async function () {
+        const lytics = new LyticsClient(apikey);
+        const csv = `user_id,event,ts
+        7456,login,"2012-10-17T17:29:39.738Z"
+        1234,"a quoted bad event","2012-12-11T19:53:31.547Z"`;
+        const response = await lytics.toLql(csv);
+        assert.isDefined(response);
+    });
+});
+
 describe('testQuery', function () {
     it('evaluates properly when valid LQL and data are provided', async function () {
         const lytics = new LyticsClient(apikey);

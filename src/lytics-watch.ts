@@ -135,17 +135,18 @@ async function startWatch(dirs: string[], maxrecords: number, apikey: string) {
                 const lql = await readFileToString(pathLql);
                 const records = await readRecordsFromFile(pathData, maxrecords);
                 for (let i = 0; i < records.length; i++) {
+                    const label = `Result ${(i + 1)}/${records.length}`;
                     const record = records[i];
                     try {
                         var result = await client.testQuery(lql, record);
-                        //logger.info(`Result ${i + 1}:\n${JSON.stringify(result, null, 4)}`);
-                        logger.info(`Result ${(i + 1)}:`);
+                        logger.info(`${label}:`);
                         jsome(result);
                     }
                     catch (err) {
-                        logger.error(`Result ${(i + 1)} failed: ${err}`);
+                        logger.error(`${label} failed: ${err}`);
                     }
                 }
+                logger.info(`Done handling records: ${records.length}`);
             }
             catch (err) {
                 logger.error(`Error: ${err}`);

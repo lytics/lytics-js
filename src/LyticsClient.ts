@@ -116,7 +116,7 @@ export class LyticsClient {
     async getTableSchemaFieldInfo(tableName: string, fieldName: string): Promise<TableSchemaFieldInfo | undefined> {
         if (this.isNullOrWhitespace(tableName) || this.isNullOrWhitespace(fieldName)) {
             throw new Error('Required parameter is missing.');
-        }        
+        }
         const url = `${base_url}/api/schema/${tableName}/fieldinfo?fields=${fieldName}`;
         const data = await this.doGet(url)
             .catch(err => {
@@ -208,6 +208,23 @@ export class LyticsClient {
         return Promise.resolve(map);
     }
 
+    async toLql(csvText: string): Promise<string | undefined> {
+        if (this.isNullOrWhitespace(csvText)) {
+            throw new Error('Required parameter is missing.');
+        }
+        const headers = this.headers;
+        headers['Content-Type'] = 'application/csv';
+        const url = `${base_url}/api/query/_tolql`;
+        const config = {
+            url: url,
+            method: 'post',
+            data: csvText,
+            headers: this.headers
+        };
+        const response = await axios.request(config);
+        return Promise.resolve(response.data);
+    }
+
     async testQuery(lql: string, record: any): Promise<any> {
         if (this.isNullOrWhitespace(lql) || !record) {
             throw new Error('Required parameter is missing.');
@@ -217,7 +234,7 @@ export class LyticsClient {
         return this.doPost(url, lql);
     }
 
-    async collect(stream: string, data:any): Promise<CollectResultInfo|undefined> {
+    async collect(stream: string, data: any): Promise<CollectResultInfo | undefined> {
         if (this.isNullOrWhitespace(stream) || !data) {
             throw new Error('Required parameter is missing.');
         }
@@ -225,7 +242,7 @@ export class LyticsClient {
         const result = await this.doPost(url, data);
         return Promise.resolve(result);
     }
-    async getSegments():Promise<Segment[]> {
+    async getSegments(): Promise<Segment[]> {
         const url = `${base_url}/api/segment`;
         const segments = await this.doGet(url) as Segment[];
         if (!segments) {
@@ -234,21 +251,21 @@ export class LyticsClient {
         segments.sort(this.compareByNameProperty);
         return Promise.resolve(segments);
     }
-    async getSegment(idOrSlug:string):Promise<Segment|undefined> {
+    async getSegment(idOrSlug: string): Promise<Segment | undefined> {
         if (this.isNullOrWhitespace(idOrSlug)) {
             throw new Error('Required parameter is missing.');
         }
         const url = `${base_url}/api/segment/${idOrSlug}`;
         const segment = await this.doGet(url)
             .catch(err => {
-            if (err.response.status === 404) {
-                return;
-            }
-            throw err;
-        });
+                if (err.response.status === 404) {
+                    return;
+                }
+                throw err;
+            });
         return Promise.resolve(segment);
     }
-    async getSegmentCollection(ids?:string[]):Promise<SegmentCollection> {
+    async getSegmentCollection(ids?: string[]): Promise<SegmentCollection> {
         const col = new SegmentCollection();
         const url = `${base_url}/api/segment`;
         const segments = await this.doGet(url) as Segment[];
@@ -287,7 +304,7 @@ export class LyticsClient {
         }
         return 0;
     }
-    private isNullOrWhitespace(value?:string):boolean {
+    private isNullOrWhitespace(value?: string): boolean {
         return (!value || value.trim().length == 0);
     }
 }
