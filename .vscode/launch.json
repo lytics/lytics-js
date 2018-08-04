@@ -5,14 +5,14 @@
             "type": "node",
             "request": "launch",
             "name": "Lytics Watch",
-            "program": "${workspaceFolder}/dist/index-watch.js",
+            "program": "${workspaceFolder}/dist/lytics-watch.js",
             "args": [
                 "watch",
                 "-k",
                 "[!!! API key !!!]",
                 "-m",
                 "2",
-                "${workspaceFolder}/src/test"
+                "[!!! folder to watch !!!]"
             ]
         },
         {

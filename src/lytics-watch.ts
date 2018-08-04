@@ -34,6 +34,7 @@ commander
     .option('-k, --key <key>', 'Lytics API key (if not specified, environment variable LIOKEY is used)')
     .option('-m, --max <max>', 'Maximum number of records read from the data file (default: 5)', parseInt)
     .option('-l, --log <log>', 'Log level', /^(error|warn|info|verbose|debug)$/i, default_log_level)
+    .option('-C, --no-color', 'Disable colorized JSON output')
     .parse(process.argv);
 main();
 
@@ -70,6 +71,8 @@ async function main() {
         logger.info(`Changing log level: ${logger.level} => ${commander.log}`);
         logger.level = commander.log;
     }
+    jsome.params.colored = commander.color;
+    logger.info(`Colorize JSON output: ${commander.color}`);
     startWatch(dirs, maxrecords, apikey);
 }
 
