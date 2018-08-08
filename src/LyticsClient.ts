@@ -1,7 +1,7 @@
 'use strict';
 import axios, { AxiosRequestConfig, } from 'axios';
 import qs = require('query-string');
-import { LyticsAccount, DataStream, DataStreamField, TableSchema, TableSchemaField, TableSchemaFieldInfo, Query, CollectResultInfo, SegmentCollection, Segment } from './types';
+import { LyticsAccount, DataStream, DataStreamField, TableSchema, TableSchemaField, TableSchemaFieldInfo, Query, CollectResultInfo, SegmentCollection, Segment, Campaign, CampaignVariation } from './types';
 import { isArray } from 'util';
 
 const base_url = 'https://api.lytics.io';
@@ -306,5 +306,60 @@ export class LyticsClient {
     }
     private isNullOrWhitespace(value?: string): boolean {
         return (!value || value.trim().length == 0);
+    }
+
+    async getCampaigns(): Promise<Campaign[]> {
+        const url = `${base_url}/api/program/campaign`;
+        const campaigns = await this.doGet(url) as Campaign[];
+        if (!campaigns) {
+            throw new Error('An array of campaigns was expected.');
+        }
+        campaigns.sort(this.compareByNameProperty);
+        return Promise.resolve(campaigns);
+    }
+
+    async getCampaign(id: string): Promise<Campaign | undefined> {
+        if (this.isNullOrWhitespace(id)) {
+            throw new Error('Required parameter is missing.');
+        }
+        const url = `${base_url}/api/program/campaign/${id}`;
+        const campaign = await this.doGet(url) 
+        .catch(err => {
+            if (err.response.status === 404) {
+                return Promise.resolve(undefined);
+            }
+            throw err;
+        });
+        return Promise.resolve(campaign);
+    }
+
+    async getCampaignVariationsAll(): Promise<Map<string, CampaignVariation[]>> {
+        const url = `${base_url}/api/program/campaign/variation`;
+        const variations = await this.doGet(url) as CampaignVariation[];
+        if (!variations) {
+            throw new Error('An array of campaigns was expected.');
+        }
+        const map = new Map<string, CampaignVariation[]>();
+        for (let i = 0; i < variations.length; i++) {
+            const variation = variations[i];
+            if (!variation) {
+                throw new Error(`Campaign variation at position ${i} is null.`);
+            }
+            if (!map.has(variation.campaign_id!)) {
+                map.set(variation.campaign_id!, []);
+            }
+            const cvars = map.get(variation.campaign_id!);
+            cvars!.push(variation);
+        }
+        return Promise.resolve(map);
+    }
+
+    async getCampaignVariations(campaignId:string): Promise<CampaignVariation[]> {
+        if (this.isNullOrWhitespace(campaignId)) {
+            throw new Error('Required parameter is missing.');
+        }
+        var map = await this.getCampaignVariationsAll();
+        var variations = map.has(campaignId) ? map.get(campaignId) : [];
+        return Promise.resolve(variations!);
     }
 }

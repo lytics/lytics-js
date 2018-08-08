@@ -166,34 +166,147 @@ export class CollectResultInfo {
     filename: string | undefined;
 }
 export class SegmentCollection {
-    audiences:Segment[] = [];
-    characteristics:Segment[] = [];
-    unidentified:Segment[] = [];
+    audiences: Segment[] = [];
+    characteristics: Segment[] = [];
+    unidentified: Segment[] = [];
 }
 export class Segment {
-    account_id: string|undefined;
-    aid: number=0;
+    account_id: string | undefined;
+    aid: number = 0;
     ast: any;
-    author_id: string|undefined;
-    created: string|undefined;
-    datemath_calc: boolean=false;
-    deleted: boolean=false;
-    description: string|undefined;
-    forward_datemath: boolean=false;
-    id: string|undefined;
-    invalid: boolean=false;
-    invalid_reason: string|undefined;
-    is_public: boolean=false;
-    kind: string|undefined;
-    name: string|undefined;
-    public_name: string|undefined;
-    save_hist: boolean=false;
-    schedule_exit: boolean=false;
-    segment_ql: string|undefined;
-    short_id: string|undefined;
-    slug_name: string|undefined;
-    table: string|undefined;
+    author_id: string | undefined;
+    created: string | undefined;
+    datemath_calc: boolean = false;
+    deleted: boolean = false;
+    description: string | undefined;
+    forward_datemath: boolean = false;
+    id: string | undefined;
+    invalid: boolean = false;
+    invalid_reason: string | undefined;
+    is_public: boolean = false;
+    kind: string | undefined;
+    name: string | undefined;
+    public_name: string | undefined;
+    save_hist: boolean = false;
+    schedule_exit: boolean = false;
+    segment_ql: string | undefined;
+    short_id: string | undefined;
+    slug_name: string | undefined;
+    table: string | undefined;
     tags: string[] = [];
-    updated: string|undefined;
+    updated: string | undefined;
 };
 
+export class Campaign {
+    id: string | undefined;
+    aid: number = 0;
+    account_id: string | undefined;
+    user_id: string | undefined;
+    created: string | undefined;
+    updated: string | undefined;
+    created_at: string | undefined;
+    updated_at: string | undefined;
+    name: string | undefined;
+    system_status: string | undefined;
+    published_at: string | undefined;
+    start_at: string | undefined;
+    segments: string[] = [];
+}
+
+export class CampaignVariation {
+    id: string | undefined;
+    aid: number = 0;
+    account_id: string | undefined;
+    user_id: string | undefined;
+    created: string | undefined;
+    updated: string | undefined;
+    created_at: string | undefined;
+    updated_at: string | undefined;
+    variation: number = 0;
+    campaign_id: string | undefined;
+    vehicle: string | undefined;
+    reach: string | undefined;
+    conversion: string | undefined;
+    detail: CampaignVariationDetail | undefined;
+    detail_override: CampaignVariationDetailOverride | undefined;
+}
+
+export class CampaignVariationDetail {
+    appearsOn: CampaignVariationAppearanceRule[] = [];
+    attachment: string | undefined;
+    body: string | undefined;
+    className: string | undefined;
+    colors: CampaignVariationColor[] = [];
+    displayOptions: CampaignVariationDisplayOption[] = [];
+    formFields: CampaignVariationFormField[] = [];
+    headline: string | undefined;
+    image: string | undefined;
+    layout: string | undefined;
+    okMessage: string | undefined;
+    theme: string | undefined;
+    typeKey: string | undefined;
+}
+export class CampaignVariationAppearanceRule {
+    exclude: boolean = false;
+    match: string | undefined;
+    value: string | undefined;
+}
+
+export class CampaignVariationColor {
+    hex: string | undefined;
+    key: string | undefined;
+    title: string | undefined;
+}
+
+export class CampaignVariationDisplayOption {
+    key: string | undefined;
+    value: string | undefined;
+}
+
+export class CampaignVariationFormField {
+    isEnabled: boolean = false;
+    isRequired: boolean = false;
+    placeholder: string | undefined;
+    slug: string | undefined;
+}
+
+export class CampaignVariationDetailOverride {
+    confirmAction: CampaignVariationDetailOverrideConfirmAction | undefined;
+    fields: CampaignVariationDetailOverrideFields | undefined;
+    formElements: CampaignVariationDetailOverrideFormElement[] = [];
+    formFields: any[] = [];
+    formStates: CampaignVariationDetailOverrideFormStates | undefined;
+}
+
+export class CampaignVariationDetailOverrideConfirmAction {
+    callback: string | undefined;
+    waitForAsyncResponse: boolean = false;
+}
+
+export class CampaignVariationDetailOverrideFields {
+    name: boolean = true;
+    email: boolean = true;
+    title: boolean = true;
+    company: boolean = true;
+    phone: boolean = true;
+    referralEmail: boolean = true;
+    message: boolean = true;
+}
+
+export class CampaignVariationDetailOverrideFormElement {
+    label: string | undefined;
+    name: string | undefined;
+    required: boolean = false;
+    type: string | undefined;
+}
+
+export class CampaignVariationDetailOverrideFormStates {
+    error: CampaignVariationDetailOverrideFormState | undefined;
+    success: CampaignVariationDetailOverrideFormState | undefined;
+}
+
+export class CampaignVariationDetailOverrideFormState {
+    delay: number = 0;
+    headline: string | undefined;
+    msg: string | undefined;
+}
