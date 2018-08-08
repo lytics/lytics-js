@@ -323,13 +323,13 @@ export class LyticsClient {
             throw new Error('Required parameter is missing.');
         }
         const url = `${base_url}/api/program/campaign/${id}`;
-        const campaign = await this.doGet(url) 
-        .catch(err => {
-            if (err.response.status === 404) {
-                return Promise.resolve(undefined);
-            }
-            throw err;
-        });
+        const campaign = await this.doGet(url)
+            .catch(err => {
+                if (err.response.status === 404) {
+                    return Promise.resolve(undefined);
+                }
+                throw err;
+            });
         return Promise.resolve(campaign);
     }
 
@@ -354,12 +354,27 @@ export class LyticsClient {
         return Promise.resolve(map);
     }
 
-    async getCampaignVariations(campaignId:string): Promise<CampaignVariation[]> {
+    async getCampaignVariations(campaignId: string): Promise<CampaignVariation[]> {
         if (this.isNullOrWhitespace(campaignId)) {
             throw new Error('Required parameter is missing.');
         }
         var map = await this.getCampaignVariationsAll();
         var variations = map.has(campaignId) ? map.get(campaignId) : [];
         return Promise.resolve(variations!);
+    }
+
+    async getCampaignVariation(variationId: string): Promise<CampaignVariation | undefined> {
+        if (this.isNullOrWhitespace(variationId)) {
+            throw new Error('Required parameter is missing.');
+        }
+        const url = `${base_url}/api/program/campaign/variation/${variationId}`;
+        const variation = await this.doGet(url)
+            .catch(err => {
+                if (err.response.status === 404) {
+                    return Promise.resolve(undefined);
+                }
+                throw err;
+            });
+        return Promise.resolve(variation);
     }
 }
