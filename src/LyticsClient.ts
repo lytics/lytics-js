@@ -1,7 +1,7 @@
 'use strict';
 import axios, { AxiosRequestConfig, } from 'axios';
 import qs = require('query-string');
-import { LyticsAccount, DataStream, DataStreamField, TableSchema, TableSchemaField, TableSchemaFieldInfo, Query, CollectResultInfo, SegmentCollection, Segment, Campaign, CampaignVariation } from './types';
+import { LyticsAccount, DataStream, DataStreamField, TableSchema, TableSchemaField, TableSchemaFieldInfo, Query, CollectResultInfo, SegmentCollection, Segment, Campaign, CampaignVariation, ContentClassification } from './types';
 import { isArray } from 'util';
 
 const base_url = 'https://api.lytics.io';
@@ -376,5 +376,22 @@ export class LyticsClient {
                 throw err;
             });
         return Promise.resolve(variation);
+    }
+
+    async classifyUsingText(text: string, draft: boolean = true): Promise<ContentClassification | undefined> {
+        const params = {
+            text: text,
+            draft: draft
+        };
+        const url = `${base_url}/api/content/doc/classify?${qs.stringify(params)}`;
+        return this.doPost(url, null);
+    }
+    async classifyUsingUrl(url: string, draft: boolean = true): Promise<ContentClassification | undefined> {
+        const params = {
+            url: url,
+            draft: draft
+        };
+        const url2 = `${base_url}/api/content/doc/classify?${qs.stringify(params)}`;
+        return this.doPost(url2, null);
     }
 }

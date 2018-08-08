@@ -310,3 +310,60 @@ export class CampaignVariationDetailOverrideFormState {
     headline: string | undefined;
     msg: string | undefined;
 }
+
+export class ContentClassification {
+    id: string | undefined;
+    fb: string | undefined;
+    url: ContentClassificationUrl | undefined;
+    canonical: string | undefined;
+    url_redirected_from: string | undefined;
+    description: string | undefined;
+    long_description: string | undefined;
+    type: string | undefined;
+    source: string | undefined;
+    stream: string | undefined;
+    httpstatus: number = 0;
+    httpfailures: number = 0;
+    humanLanguage: string | undefined;
+    tags: ContentClassificationTag[] = [];
+    images: ContentClassificationImage[] = [];
+    primary_image: string | undefined;
+    videos: ContentClassificationVideo[] = [];
+    primary_video: string | undefined;
+    published: string | undefined;
+    author: string | undefined;
+    numpages: number = 0;
+    sitename: string | undefined;
+    productDescription: string | undefined;
+    brand: string | undefined;
+    price: string | undefined;
+    saveAmount: string | undefined;
+    productId: string | undefined;
+    created: Date | undefined;
+    fetched: Date | undefined;
+    updated: Date | undefined;
+    enriched: any;
+    version: number = 0;
+}
+export class ContentClassificationUrl {
+    Params: any;
+    Parsed: any;
+    Utm: any;
+    UserInfo: any;
+    Https: boolean = false;
+    IsStatic: boolean = false;
+}
+export class ContentClassificationTag {
+    type: string | undefined;
+    id: string | undefined;
+    value: string | undefined;
+    source: string | undefined;
+    vocab: string | undefined;
+    relevance: number = 0;
+}
+export class ContentClassificationImage {
+    url: string | undefined;
+}
+export class ContentClassificationVideo {
+    url: string | undefined;
+}

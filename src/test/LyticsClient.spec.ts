@@ -1,6 +1,7 @@
 import { LyticsClient } from '../LyticsClient';
 import { assert } from 'chai';
 import { TableSchemaFieldInfo, CollectResultInfo } from '../types';
+import { doesNotReject } from 'assert';
 const settings = require('./settings');
 
 const apikey: string = settings.lytics_apikey;
@@ -401,3 +402,42 @@ describe('getCampaignVariation', function () {
     });
 });
 
+describe('classifyUsingText', function () {
+    it('should return an object when enough text is provided', async function () {
+        const lytics = new LyticsClient(apikey);
+        const text = 'The Dawn of Love is an oil painting by English artist William Etty, first exhibited in 1828. Loosely based on a passage from John Miltons 1634 Comus, it shows Venus leaning across to wake the sleeping Love by stroking his wings. It was very poorly received when first exhibited; the stylised Venus was thought unduly influenced by foreign artists such as Rubens as well as being overly voluptuous and unrealistically coloured, while the painting as a whole was considered tasteless and obscene. The Dawn of Love was omitted from the major 1849 retrospective exhibition of Ettys works, and its exhibition in Glasgow in 1899 drew complaints for its supposed obscenity. In 1889 it was bought by Merton Russell-Cotes, and has remained in the collection of the Russell-Cotes Art Gallery & Museum ever since.';
+        var classification = await lytics.classifyUsingText(text);
+        assert.isDefined(classification);
+    });
+    it('throws an error when not enough text is provided', async function () {
+        const lytics = new LyticsClient(apikey);
+        const text = 'This is a test.';
+        try {
+            var classification = await lytics.classifyUsingText(text);
+        }
+        catch (err) {
+            return Promise.resolve();
+        }
+        return Promise.reject('No error was thrown.');
+    });
+});
+
+describe('classifyUsingUrl', function () {
+    it('should return an object when enough text is provided', async function () {
+        const lytics = new LyticsClient(apikey);
+        const url = "https://www.google.com";
+        var classification = await lytics.classifyUsingUrl(url);
+        assert.isDefined(classification);
+    });
+    it('throws an error when an invalid url is provided', async function () {
+        const lytics = new LyticsClient(apikey);
+        const url = 'not a url';
+        try {
+            var classification = await lytics.classifyUsingUrl(url);
+        }
+        catch (err) {
+            return Promise.resolve();
+        }
+        return Promise.reject('No error was thrown.');
+    });
+});
