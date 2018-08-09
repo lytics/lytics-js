@@ -23,7 +23,7 @@ export class LyticsClient {
             if (data.message === 'Not Found') {
                 return Promise.resolve(undefined);
             }
-            if (data.message === 'success' || data.message.length === 0) {
+            if (data.message === 'success' || data.message === 'updated' || data.message.length === 0) {
                 wasSuccess = true;
             }
         }
@@ -377,21 +377,20 @@ export class LyticsClient {
             });
         return Promise.resolve(variation);
     }
+    async updateCampaignVariation(variationId: string, variation:CampaignVariation): Promise<CampaignVariation | undefined> {
+        if (this.isNullOrWhitespace(variationId) || !variation) {
+            throw new Error('Required parameter is missing.');
+        }
+        const url = `${base_url}/api/program/campaign/variation/${variationId}`;
+        return this.doPost(url, variation);
+    }
 
     async classifyUsingText(text: string, draft: boolean = true): Promise<ContentClassification | undefined> {
-        const params = {
-            text: text,
-            draft: draft
-        };
-        const url = `${base_url}/api/content/doc/classify?${qs.stringify(params)}`;
-        return this.doPost(url, null);
+        const url = `${base_url}/api/content/doc/classify?draft=${draft}`;
+        return this.doPost(url, { "text": text });
     }
     async classifyUsingUrl(url: string, draft: boolean = true): Promise<ContentClassification | undefined> {
-        const params = {
-            url: url,
-            draft: draft
-        };
-        const url2 = `${base_url}/api/content/doc/classify?${qs.stringify(params)}`;
-        return this.doPost(url2, null);
+        const url2 = `${base_url}/api/content/doc/classify?draft=${draft}`;
+        return this.doPost(url2, { "url": url });
     }
 }

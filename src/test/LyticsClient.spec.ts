@@ -1,6 +1,6 @@
 import { LyticsClient } from '../LyticsClient';
 import { assert } from 'chai';
-import { TableSchemaFieldInfo, CollectResultInfo } from '../types';
+import { TableSchemaFieldInfo, CollectResultInfo, CampaignVariation, CampaignVariationDetail } from '../types';
 import { doesNotReject } from 'assert';
 const settings = require('./settings');
 
@@ -390,7 +390,7 @@ describe('getCampaignVariations', function () {
 describe('getCampaignVariation', function () {
     it('should return an object when a campaign variation that exists is specified', async function () {
         const lytics = new LyticsClient(apikey);
-        const variationId = "acd1edc9f418cdfb33d6dd6b0a944a88";
+        const variationId = "c7bcd903694c66d1d72371b51286f7da";
         var variation = await lytics.getCampaignVariation(variationId);
         assert.isDefined(variation);
         assert.equal(variation!.id, variationId);
@@ -401,11 +401,28 @@ describe('getCampaignVariation', function () {
         assert.isUndefined(variation);
     });
 });
+describe('updateCampaignVariation', function () {
+    it('should return the updated variation when a campaign variation that exists is specified', async function () {
+        const lytics = new LyticsClient(apikey);
+        const variationId = "e95f1ed37d357fff00aa938ca947e407";
+        const layout = "slideout";
+        const attachment = "bottom-left";
+        const variation = await lytics.getCampaignVariation(variationId);
+        assert.isDefined(variation);
+        variation!.detail!.layout = layout;
+        variation!.detail!.attachment = attachment;
+        const variation2 = await lytics.updateCampaignVariation(variationId, variation!);
+        assert.isDefined(variation2);
+        assert.equal(variation2!.id, variationId);
+        assert.equal(variation2!.detail!.layout, layout);
+        assert.equal(variation2!.detail!.attachment, attachment);
+    });
+});
 
 describe('classifyUsingText', function () {
     it('should return an object when enough text is provided', async function () {
         const lytics = new LyticsClient(apikey);
-        const text = 'The Dawn of Love is an oil painting by English artist William Etty, first exhibited in 1828. Loosely based on a passage from John Miltons 1634 Comus, it shows Venus leaning across to wake the sleeping Love by stroking his wings. It was very poorly received when first exhibited; the stylised Venus was thought unduly influenced by foreign artists such as Rubens as well as being overly voluptuous and unrealistically coloured, while the painting as a whole was considered tasteless and obscene. The Dawn of Love was omitted from the major 1849 retrospective exhibition of Ettys works, and its exhibition in Glasgow in 1899 drew complaints for its supposed obscenity. In 1889 it was bought by Merton Russell-Cotes, and has remained in the collection of the Russell-Cotes Art Gallery & Museum ever since.';
+        const text = '50% of the Dawn of Love is an oil painting by English artist William Etty, first exhibited in 1828. Loosely based on a passage from John Miltons 1634 Comus, it shows Venus leaning across to wake the sleeping Love by stroking his wings. It was very poorly received when first exhibited; the stylised Venus was thought unduly influenced by foreign artists such as Rubens as well as being overly voluptuous and unrealistically coloured, while the painting as a whole was considered tasteless and obscene. The Dawn of Love was omitted from the major 1849 retrospective exhibition of Ettys works, and its exhibition in Glasgow in 1899 drew complaints for its supposed obscenity. In 1889 it was bought by Merton Russell-Cotes, and has remained in the collection of the Russell-Cotes Art Gallery & Museum ever since.';
         var classification = await lytics.classifyUsingText(text);
         assert.isDefined(classification);
     });
