@@ -458,3 +458,16 @@ describe('classifyUsingUrl', function () {
         return Promise.reject('No error was thrown.');
     });
 });
+
+describe('testFunction', function () {
+    it('The tobool function returns true.', async function () {
+        const lytics = new LyticsClient(apikey);
+        var result = await lytics.testFunction('tobool', ['true']);
+        assert.isTrue(result);
+    });
+    it('The toint function returns an integer.', async function () {
+        const lytics = new LyticsClient(apikey);
+        var result = await lytics.testFunction('toint', ['100']);
+        assert.equal(result, 100);
+    });
+});

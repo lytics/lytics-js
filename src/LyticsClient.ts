@@ -393,4 +393,14 @@ export class LyticsClient {
         const url2 = `${base_url}/api/content/doc/classify?draft=${draft}`;
         return this.doPost(url2, { "url": url });
     }
+    async testFunction(functionName: string, args?: string[]): Promise<any | undefined> {
+        if (this.isNullOrWhitespace(functionName)) {
+            throw new Error('Required parameter is missing.');
+        }
+        const args2 = args ? args.map(arg => `"${arg}"`) : [''];
+        const expr = `${functionName}(${args2.join(',')})`;
+        const lql = `SELECT ${expr} AS value, email(email) AS email FROM test_stream INTO user BY email ALIAS test_query`;
+        var response = await this.testQuery(lql, { email:"test@test.com"});
+        return Promise.resolve(response.value);
+    }
 }
