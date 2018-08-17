@@ -1,10 +1,10 @@
 ## Installation 
 ```sh
+#global package installation (recommended if you are new to npm packages)
+npm install lytics-js -g
+
 #local package installation
 npm install lytics-js 
-
-#global package installation
-npm install lytics-js -g
 ```
 
 ## Usage
@@ -59,8 +59,14 @@ lytics-js -k [apikey] watch .
 
 ```sh
 #to use the Lytics API key set in the environment variable LIOKEY
-lytics-js function tobool 1
+lytics-js function contains "something really interesting" "really"
 
 #to pass the Lytics API key directly
 lytics-js -k [apikey] function tobool 1
+
+#passing multiple parameters
+lytics-js function contains "something really interesting" "really"
+
+#passing no parameters
+lytics-js function now
 ```
