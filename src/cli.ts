@@ -2,7 +2,8 @@
 'use strict';
 var program = require('commander');
 program
-  .version('0.0.5')
+  .version('0.0.16')
   .description('Interact with Lytics from JavaScript')
   .command('watch <dir> [otherDirs]', 'Automatically test queries when LQL or data files change')
+  .command('function <name> [params]', 'Call a function and display the result')
   .parse(process.argv);

@@ -1,13 +1,13 @@
 {
   "name": "lytics-js",
-  "version": "0.0.14",
+  "version": "0.0.16",
   "description": "Work with the Lytics REST API using JavaScript",
   "main": "./dist/lytics.js",
   "files": [
     "/dist"
   ],
   "bin": {
-    "lytics": "./dist/cli.js"
+    "lytics-js": "./dist/cli.js"
   },
   "dependencies": {
     "axios": "^0.18.0",

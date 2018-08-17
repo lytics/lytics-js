@@ -40,17 +40,27 @@ or globally.
 
 ```sh
 #local package
-$(npm bin)/lytics help
+$(npm bin)/lytics-js help
 
 #global package
-lytics help
+lytics-js help
 ```
 #### Lytics watch
 
 ```sh
 #to use the Lytics API key set in the environment variable LIOKEY
-lytics watch .
+lytics-js watch .
 
 #to pass the Lytics API key directly
-lytics -k [apikey] watch .
+lytics-js -k [apikey] watch .
+```
+
+#### Test query function
+
+```sh
+#to use the Lytics API key set in the environment variable LIOKEY
+lytics-js function tobool 1
+
+#to pass the Lytics API key directly
+lytics-js -k [apikey] function tobool 1
 ```
