@@ -17,7 +17,15 @@ use the Lytics API.
 ```javascript
 var lytics = require('lytics-js');
 var client = lytics.getClient('[apikey]');
+//
+//get an array of account objects
 var accounts = await client.getAccounts();
+//
+//test a query function
+var is_true = await client.testFunction('tobool', ['1']);
+var is_false = await client.testFunction('tobool', ['f']);
+var is_undefined = await client.testFunction('email', ['something that isn\'t an email']);
+var is_email = await client.testFunction('email', ['test@email.com']);
 ```
 
 ### Command-line interface (CLI)
