@@ -334,12 +334,12 @@ export class LyticsClient {
     }
 
     async getCampaignVariationsAll(): Promise<Map<string, CampaignVariation[]>> {
+        const map = new Map<string, CampaignVariation[]>();
         const url = `${base_url}/api/program/campaign/variation`;
         const variations = await this.doGet(url) as CampaignVariation[];
         if (!variations) {
-            throw new Error('An array of campaigns was expected.');
+            return map;
         }
-        const map = new Map<string, CampaignVariation[]>();
         for (let i = 0; i < variations.length; i++) {
             const variation = variations[i];
             if (!variation) {
