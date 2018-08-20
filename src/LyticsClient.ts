@@ -246,7 +246,7 @@ export class LyticsClient {
         const url = `${base_url}/api/segment`;
         const segments = await this.doGet(url) as Segment[];
         if (!segments) {
-            throw new Error('An array of segments was expected.');
+            return Promise.resolve([]);
         }
         segments.sort(this.compareByNameProperty);
         return Promise.resolve(segments);
@@ -270,7 +270,7 @@ export class LyticsClient {
         const url = `${base_url}/api/segment`;
         const segments = await this.doGet(url) as Segment[];
         if (!segments) {
-            throw new Error('An array of segments was expected.');
+            return Promise.resolve(col);
         }
         for (let i = 0; i < segments.length; i++) {
             const segment = segments[i];
@@ -312,7 +312,7 @@ export class LyticsClient {
         const url = `${base_url}/api/program/campaign`;
         const campaigns = await this.doGet(url) as Campaign[];
         if (!campaigns) {
-            throw new Error('An array of campaigns was expected.');
+            return Promise.resolve([]);
         }
         campaigns.sort(this.compareByNameProperty);
         return Promise.resolve(campaigns);
