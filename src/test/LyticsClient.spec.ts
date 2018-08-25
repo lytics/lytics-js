@@ -419,6 +419,45 @@ describe('updateCampaignVariation', function () {
     });
 });
 
+describe('getCampaignVariationDetailOverride', function () {
+    it('should return an object when a campaign variation that exists is specified', async function () {
+        const lytics = new LyticsClient(apikey);
+        const variationId = "5ad0b92b1eec4903fa4c21a3046d72a8";
+        var override = await lytics.getCampaignVariationDetailOverride(variationId);
+        assert.isDefined(override);
+        assert.isFalse(override!.fields!.email);
+    });
+    it('should return undefined when a campaign variation that does not exist is specified', async function () {
+        const lytics = new LyticsClient(apikey);
+        var override = await lytics.getCampaignVariation("sdfsdfsdfjkhkjsdf");
+        assert.isUndefined(override);
+    });
+});
+
+describe('updateCampaignVariationDetailOverride', function () {
+    it('should return the updated variation when a campaign variation that exists is specified', async function () {
+        const lytics = new LyticsClient(apikey);
+        const variationId = "5ad0b92b1eec4903fa4c21a3046d72a8";
+        const override = await lytics.getCampaignVariationDetailOverride(variationId);
+        assert.isDefined(override);
+        assert.isFalse(override!.fields!.email);
+        override!.fields!.email = true;
+        const variation2 = await lytics.updateCampaignVariationDetailOverride(variationId, override!);
+        assert.isDefined(variation2);
+
+        const override2 = await lytics.getCampaignVariationDetailOverride(variationId);
+        assert.isDefined(override2);
+        assert.isTrue(override2!.fields!.email);
+        override2!.fields!.email = false;
+        const variation3 = await lytics.updateCampaignVariationDetailOverride(variationId, override2!);
+        assert.isDefined(variation3);
+
+        const override3 = await lytics.getCampaignVariationDetailOverride(variationId);
+        assert.isDefined(override3);
+        assert.isFalse(override3!.fields!.email);
+    });
+});
+
 describe('classifyUsingText', function () {
     it('should return an object when enough text is provided', async function () {
         const lytics = new LyticsClient(apikey);

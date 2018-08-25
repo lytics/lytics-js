@@ -1,7 +1,7 @@
 'use strict';
 import axios, { AxiosRequestConfig, } from 'axios';
 import qs = require('query-string');
-import { LyticsAccount, DataStream, DataStreamField, TableSchema, TableSchemaField, TableSchemaFieldInfo, Query, CollectResultInfo, SegmentCollection, Segment, Campaign, CampaignVariation, ContentClassification } from './types';
+import { LyticsAccount, DataStream, DataStreamField, TableSchema, TableSchemaField, TableSchemaFieldInfo, Query, CollectResultInfo, SegmentCollection, Segment, Campaign, CampaignVariation, ContentClassification, CampaignVariationDetailOverride } from './types';
 import { isArray } from 'util';
 
 const base_url = 'https://api.lytics.io';
@@ -383,6 +383,21 @@ export class LyticsClient {
         }
         const url = `${base_url}/api/program/campaign/variation/${variationId}`;
         return this.doPost(url, variation);
+    }
+    async getCampaignVariationDetailOverride(variationId: string): Promise<CampaignVariationDetailOverride | undefined> {
+        var variation = await this.getCampaignVariation(variationId);
+        if (!variation) {
+            return Promise.resolve(undefined);
+        }
+        return Promise.resolve(variation.detail_override);
+    }
+    async updateCampaignVariationDetailOverride(variationId: string, override:CampaignVariationDetailOverride): Promise<CampaignVariation | undefined> {
+        if (this.isNullOrWhitespace(variationId) || !override) {
+            throw new Error('Required parameter is missing.');
+        }
+        var variation = new CampaignVariation();
+        variation.detail_override = override;
+        return this.updateCampaignVariation(variationId, variation);
     }
 
     async classifyUsingText(text: string, draft: boolean = true): Promise<ContentClassification | undefined> {
