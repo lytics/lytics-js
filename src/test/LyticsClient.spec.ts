@@ -510,3 +510,27 @@ describe('testFunction', function () {
         assert.equal(result, 100);
     });
 });
+
+describe('setWhitelistFieldStatus', function () {
+    it('Add an already existing field returns false.', async function () {
+        const lytics = new LyticsClient(apikey);
+        const before = await lytics.getWhitelistFields(aid);
+        const resetWhenFinished = before.indexOf('email') == -1;
+        if (resetWhenFinished) {
+            await lytics.setWhitelistFieldStatus(aid, 'email', true);
+        }
+        var result = await lytics.setWhitelistFieldStatus(aid, 'email', true);
+        assert.isFalse(result);
+        if (resetWhenFinished) {
+            result = await lytics.setWhitelistFieldStatus(aid, 'email', false);
+            assert.isTrue(result);
+        }
+        const after = await lytics.getWhitelistFields(aid);
+        before.sort();
+        after.sort();
+        assert.equal(after.length, before.length);
+        for(var i=0; i<before.length; i++) {
+            assert.equal(after[i], before[i]);
+        }
+    });
+});

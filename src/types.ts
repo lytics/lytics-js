@@ -24,6 +24,7 @@ export class LyticsAccount {
     pubusers: boolean = false;
     two_factor_auth: boolean = false;
     updated: string | undefined;
+    whitelist_fields: string[] = [];
     constructor() {
         this.features = {
             "audience-attribution": false,

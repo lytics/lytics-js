@@ -418,4 +418,58 @@ export class LyticsClient {
         var response = await this.testQuery(lql, { email:"test@test.com"});
         return Promise.resolve(response.value);
     }
+    async getWhitelistFields(aid:number): Promise<string[]> {
+        if (aid === 0) {
+            throw new Error('Required parameter is missing.');
+        }
+        const account = await this.getAccount(aid);
+        if (!account) {
+            throw new Error(`Account ${aid} does not exist or cannot be accessed.`);
+        }
+        if (!account.whitelist_fields) {
+            return Promise.resolve([]);
+        }
+        if (account.whitelist_fields.length == 1 && this.isNullOrWhitespace(account.whitelist_fields[0])) {
+            return Promise.resolve([]);
+        }
+        return Promise.resolve(account.whitelist_fields);
+    }
+    /**
+     * 
+     * @param aid
+     * @param fieldName 
+     * @param add 
+     * @returns true if a change was made; false if no change was made. For example, if the field "email" is already whitelisted and try to add "email" to the whitelist, this function returns false.
+     */
+    async setWhitelistFieldStatus(aid:number, fieldName: string, add: boolean): Promise<boolean> {
+        if (this.isNullOrWhitespace(fieldName)) {
+            throw new Error('Required parameter is missing.');
+        }
+        const fields = await this.getWhitelistFields(aid);
+        const position = fields.indexOf(fieldName);
+        if (position == -1) {
+            if (!add) {
+                return Promise.resolve(false);
+            }
+            fields.push(fieldName);
+        }
+        else {
+            if (add) {
+                return Promise.resolve(false);
+            }
+            fields.splice(position, 1);
+            if (fields.length == 0) {
+                //
+                // Lytics will not write an empty array, so
+                // an empty string is used in order to force
+                // the existing value to be replaced.
+                fields.push('');
+            }
+        }
+        const data = {
+            "whitelist_fields": fields
+        };
+        const url = `${base_url}/api/account/${aid}`;
+        return this.doPost(url, data);
+    }
 }

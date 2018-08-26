@@ -70,3 +70,16 @@ lytics-js function contains "something really interesting" "really"
 #passing no parameters
 lytics-js function now
 ```
+
+#### User field whitelisting
+
+```sh
+#list user fields currently whitelisted
+lytics-js whitelist -a [Lytics account ID] list
+
+#add a field to the whitelist
+lytics-js whitelist -a [Lytics account ID] add email
+
+#remove a field from the whitelist
+lytics-js whitelist -a [Lytics account ID] remove email
+```
