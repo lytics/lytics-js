@@ -248,7 +248,6 @@ export class LyticsClient {
         if (!segments) {
             return Promise.resolve([]);
         }
-        segments.sort(this.compareByNameProperty);
         return Promise.resolve(segments);
     }
     async getSegment(idOrSlug: string): Promise<Segment | undefined> {
@@ -290,19 +289,7 @@ export class LyticsClient {
                 target.push(segment);
             }
         }
-        col.characteristics.sort(this.compareByNameProperty);
-        col.audiences.sort(this.compareByNameProperty);
-        col.unidentified.sort(this.compareByNameProperty);
         return Promise.resolve(col);
-    }
-    private compareByNameProperty(a: any, b: any): number {
-        if (a.name < b.name) {
-            return -1;
-        }
-        if (a.name > b.name) {
-            return 1;
-        }
-        return 0;
     }
     private isNullOrWhitespace(value?: string): boolean {
         return (!value || value.trim().length == 0);
@@ -314,7 +301,6 @@ export class LyticsClient {
         if (!campaigns) {
             return Promise.resolve([]);
         }
-        campaigns.sort(this.compareByNameProperty);
         return Promise.resolve(campaigns);
     }
 
@@ -473,22 +459,12 @@ export class LyticsClient {
         return this.doPost(url, data);
     }
 
-    private compareByLabelProperty(a: any, b: any): number {
-        if (a.label < b.label) {
-            return -1;
-        }
-        if (a.label > b.label) {
-            return 1;
-        }
-        return 0;
-    }
     async getTopics(limit:number = 500): Promise<Topic[]> {
         const url = `${base_url}/api/content/topic?limit=${limit}`;
         const topics = await this.doGet(url) as Topic[];
         if (!topics) {
             return Promise.resolve([]);
         }
-        topics.sort(this.compareByLabelProperty);
         return Promise.resolve(topics);
     }
     async getTopic(label: string): Promise<Topic | undefined> {
@@ -504,7 +480,7 @@ export class LyticsClient {
             throw new Error('Required parameter is missing.');
         }
         const url = `${base_url}/api/content/topic/${label}/urls?limit=${limit}`;
-        const collection = await this.doGet(url);
+        const collection = await this.doGet(url)
         return Promise.resolve(collection);
     }
 }
