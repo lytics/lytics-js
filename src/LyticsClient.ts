@@ -1,7 +1,7 @@
 'use strict';
 import axios, { AxiosRequestConfig, } from 'axios';
 import qs = require('query-string');
-import { LyticsAccount, DataStream, DataStreamField, TableSchema, TableSchemaField, TableSchemaFieldInfo, Query, CollectResultInfo, SegmentCollection, Segment, Campaign, CampaignVariation, ContentClassification, CampaignVariationDetailOverride } from './types';
+import { LyticsAccount, DataStream, DataStreamField, TableSchema, TableSchemaField, TableSchemaFieldInfo, Query, CollectResultInfo, SegmentCollection, Segment, Campaign, CampaignVariation, ContentClassification, CampaignVariationDetailOverride, Topic, TopicUrlCollection } from './types';
 import { isArray } from 'util';
 
 const base_url = 'https://api.lytics.io';
@@ -471,5 +471,40 @@ export class LyticsClient {
         };
         const url = `${base_url}/api/account/${aid}`;
         return this.doPost(url, data);
+    }
+
+    private compareByLabelProperty(a: any, b: any): number {
+        if (a.label < b.label) {
+            return -1;
+        }
+        if (a.label > b.label) {
+            return 1;
+        }
+        return 0;
+    }
+    async getTopics(limit:number = 500): Promise<Topic[]> {
+        const url = `${base_url}/api/content/topic?limit=${limit}`;
+        const topics = await this.doGet(url) as Topic[];
+        if (!topics) {
+            return Promise.resolve([]);
+        }
+        topics.sort(this.compareByLabelProperty);
+        return Promise.resolve(topics);
+    }
+    async getTopic(label: string): Promise<Topic | undefined> {
+        if (this.isNullOrWhitespace(label)) {
+            throw new Error('Required parameter is missing.');
+        }
+        const url = `${base_url}/api/content/topic/${label}`;
+        const topic = await this.doGet(url);
+        return Promise.resolve(topic);
+    }
+    async getTopicUrls(label: string, limit:number = 10): Promise<TopicUrlCollection> {
+        if (this.isNullOrWhitespace(label)) {
+            throw new Error('Required parameter is missing.');
+        }
+        const url = `${base_url}/api/content/topic/${label}/urls?limit=${limit}`;
+        const collection = await this.doGet(url);
+        return Promise.resolve(collection);
     }
 }

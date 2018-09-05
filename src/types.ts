@@ -368,3 +368,39 @@ export class ContentClassificationImage {
 export class ContentClassificationVideo {
     url: string | undefined;
 }
+export class Topic {
+    label: string | undefined;
+    doc_count: number = 0;
+    total: number = 0;
+    missing: number = 0;
+    present: number = 0;
+    bucket_none: number = 0;
+    bucket_low: number = 0;
+    bucket_mid: number = 0;
+    bucket_high: number = 0;
+    avg: number = 0;
+    tags: string[] = [];
+}
+export class TopicUrl {
+    url: string | undefined;
+    https: boolean = false;
+    title: string | undefined;
+    description: string | undefined;
+    topics: string[] = [];
+    topic_relevances: any;
+    primary_image: string | undefined;
+    author: string | undefined;
+    created: Date | undefined;
+    id: string | undefined;
+    sitename: string | undefined;
+    stream: string | undefined;
+    aspects: string[] = [];
+    language: string | undefined;
+    updated: Date | undefined;
+    fetched: Date | undefined;
+    meta: string[] = [];
+}
+export class TopicUrlCollection {
+    total: number = 0;
+    urls: TopicUrl[] = [];
+}

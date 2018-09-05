@@ -534,3 +534,54 @@ describe('setWhitelistFieldStatus', function () {
         }
     });
 });
+
+describe('getTopics', function () {
+    it('should get all topics with no limit set', async function () {
+        const lytics = new LyticsClient(apikey);
+        const topics = await lytics.getTopics();
+        assert.isDefined(topics);
+        assert.isTrue(topics.length > 0);
+        assert.isTrue(topics.length <= 500);
+    });
+    it('should get 2 topics when limit is set to 2', async function () {
+        const lytics = new LyticsClient(apikey);
+        const topics = await lytics.getTopics(2);
+        assert.isDefined(topics);
+        assert.equal(topics.length, 2);
+    });
+});
+
+describe('getTopic', function () {
+    it('should get undefined when the specified label does not match an existing topic', async function () {
+        const lytics = new LyticsClient(apikey);
+        const topic = await lytics.getTopic('asdasd');
+        assert.isDefined(topic);
+        assert.equal(topic!.doc_count, 0);
+    });
+    it('should get the topic that matches the specified label', async function () {
+        const lytics = new LyticsClient(apikey);
+        const topic = await lytics.getTopic('Protein');
+        assert.isDefined(topic);
+        assert.equal(topic!.label, 'Protein');
+        assert.isTrue(topic!.doc_count > 0);
+    });
+});
+
+describe('getTopicUrls', function () {
+    it('should get an empty collection when no topic matches the specified label', async function () {
+        const lytics = new LyticsClient(apikey);
+        const urls = await lytics.getTopicUrls('asdasd');
+        assert.isDefined(urls);
+        assert.equal(urls!.total, 0);
+        assert.isDefined(urls!.urls);
+        assert.equal(urls!.urls.length, 0);
+    });
+    it('should get a populated collection when a topic matches the specified label', async function () {
+        const lytics = new LyticsClient(apikey);
+        const urls = await lytics.getTopicUrls('Protein');
+        assert.isDefined(urls);
+        assert.isTrue(urls!.total > 0);
+        assert.isDefined(urls!.urls);
+        assert.isTrue(urls!.urls.length > 0);
+    });
+});
