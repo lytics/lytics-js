@@ -1,3 +1,5 @@
+import { Url } from "url";
+
 export class LyticsAccount {
     aid: number = 0;
     apikey: string | undefined;
@@ -403,4 +405,44 @@ export class TopicUrl {
 export class TopicUrlCollection {
     total: number = 0;
     urls: TopicUrl[] = [];
+}
+export class Subscription {
+    aid: number = 0;
+    id: string | undefined;
+    account_id: string | undefined;
+    name: string | undefined;
+    slug: string | undefined;
+    description: string | undefined;
+    channel: string | undefined;
+    updated: Date | undefined;
+    created: Date | undefined;
+    version: string | undefined;
+    table: string | undefined;
+    withbackfill: boolean = false;
+    work_id: string | undefined;
+    object: string | undefined;
+    segment_ids: string[] = [];
+    query: string | undefined;
+}
+export class WebhookConfig {
+    channel: string = "webhook";
+    version: string = "new";
+    name: string | undefined;
+    description: string | undefined;
+    webhook_url: Url | undefined;
+    headers: any | undefined;
+    segment_ids: string[] = [];
+    user_fields: string[] = [];
+    static isValid = (obj: any): boolean => {
+        if (obj) {
+            if (!obj.name || obj.name.trim().length == 0) {
+                return false;
+            }
+            if (!obj.webhook_url) {
+                return false;
+            }
+            return true;
+        }
+        return false;
+    }
 }

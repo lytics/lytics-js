@@ -1,6 +1,6 @@
 import { LyticsClient } from '../LyticsClient';
 import { assert } from 'chai';
-import { TableSchemaFieldInfo, CollectResultInfo, CampaignVariation, CampaignVariationDetail } from '../types';
+import { TableSchemaFieldInfo, CollectResultInfo, CampaignVariation, CampaignVariationDetail, WebhookConfig } from '../types';
 import { doesNotReject } from 'assert';
 const settings = require('./settings');
 
@@ -583,5 +583,66 @@ describe('getTopicUrls', function () {
         assert.isTrue(urls!.total > 0);
         assert.isDefined(urls!.urls);
         assert.isTrue(urls!.urls.length > 0);
+    });
+});
+
+describe('getSubscriptions', function () {
+    it('should return subscriptions', async function () {
+        const lytics = new LyticsClient(apikey);
+        var subscriptions = await lytics.getSubscriptions();
+        assert.isDefined(subscriptions);
+        assert.isArray(subscriptions);
+    });
+});
+describe('getSubscription', function () {
+    it('should return the specified subscription when the subscription exists', async function () {
+        const subscriptionId = "17e5c8c1a9f8e467d6786497a32c9ffc";
+        const lytics = new LyticsClient(apikey);
+        var subscription = await lytics.getSubscription(subscriptionId);
+        assert.isDefined(subscription);
+        assert.equal(subscription!.id, subscriptionId);
+    });
+    it('should return undefined when the subscription does not exist', async function () {
+        const subscriptionId = "sdfasdfasdfasfda";
+        const lytics = new LyticsClient(apikey);
+        var subscription = await lytics.getSubscription(subscriptionId);
+        assert.isUndefined(subscription);
+    });
+});
+describe('createWebhook', function () {
+    it('should throw error when values are missing from the webhook config object', async function () {
+        const lytics = new LyticsClient(apikey);
+        lytics.createWebhook(new WebhookConfig())
+            .then(result => assert.isTrue(false))
+            .catch(err => assert.isTrue(true));
+    });
+    it('should return a subscription when the webhook config object is properly configured', async function () {;
+        const lytics = new LyticsClient(apikey);
+        const config = new WebhookConfig();
+        config.name = 'test1 name';
+        config.description = 'test1 description';
+        config.webhook_url = new URL("https://localhost.com");
+        config.segment_ids.push('5d76aaa11136c5f58aaeed405fb2a6a5');
+        config.segment_ids.push('eb1879ebb2338b58bd0ee3a5660e28d4');
+        var subscription = await lytics.createWebhook(config);
+        assert.isDefined(subscription);
+        assert.equal(subscription!.name, config.name);
+        assert.equal(subscription!.description, config.description);
+        assert.equal(subscription!.segment_ids.length, config.segment_ids.length);
+    });
+});
+describe('deleteSubscription', function () {
+    it('should throw error when trying to delete a subscription that does not exist', async function () {
+        const lytics = new LyticsClient(apikey);
+        lytics.deleteSubscription('asdasdasda')
+            .then(result => assert.isTrue(false))
+            .catch(err => assert.isTrue(true));
+    });
+    it('should return a subscription when a subscription is deleted', async function () {;
+        const id = '1beee30439bf8634b5a73e48c67c80be';
+        const lytics = new LyticsClient(apikey);
+        var subscription = await lytics.deleteSubscription(id);
+        assert.isDefined(subscription);
+        assert.equal(subscription!.id, id);
     });
 });

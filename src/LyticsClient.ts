@@ -1,8 +1,9 @@
 'use strict';
 import axios, { AxiosRequestConfig, } from 'axios';
 import qs = require('query-string');
-import { LyticsAccount, DataStream, DataStreamField, TableSchema, TableSchemaField, TableSchemaFieldInfo, Query, CollectResultInfo, SegmentCollection, Segment, Campaign, CampaignVariation, ContentClassification, CampaignVariationDetailOverride, Topic, TopicUrlCollection } from './types';
+import { LyticsAccount, DataStream, DataStreamField, TableSchema, TableSchemaField, TableSchemaFieldInfo, Query, CollectResultInfo, SegmentCollection, Segment, Campaign, CampaignVariation, ContentClassification, CampaignVariationDetailOverride, Topic, TopicUrlCollection, Subscription, WebhookConfig } from './types';
 import { isArray } from 'util';
+import { Url } from 'url';
 
 const base_url = 'https://api.lytics.io';
 export class LyticsClient {
@@ -19,11 +20,11 @@ export class LyticsClient {
         var wasSuccess: boolean = false;
         const response = await axios.request(config);
         const data = response.data;
-        if (data.status === 200) {
+        if (data.status === 200 || data.status === 201) {
             if (data.message === 'Not Found') {
                 return Promise.resolve(undefined);
             }
-            if (data.message === 'success' || data.message === 'updated' || data.message.length === 0) {
+            if (data.message === 'created' || data.message === 'success' || data.message === 'updated' || data.message.length === 0) {
                 wasSuccess = true;
             }
         }
@@ -53,6 +54,14 @@ export class LyticsClient {
             url: url,
             method: 'post',
             data: data,
+            headers: this.headers
+        };
+        return this.doRequest(config, dataHandler);
+    }
+    private async doDelete(url: string, dataHandler?: (data: string) => any): Promise<any> {
+        const config = {
+            url: url,
+            method: 'delete',
             headers: this.headers
         };
         return this.doRequest(config, dataHandler);
@@ -483,4 +492,50 @@ export class LyticsClient {
         const collection = await this.doGet(url)
         return Promise.resolve(collection);
     }
+
+    async getSubscriptions(): Promise<Subscription[]> {
+        const url = `${base_url}/api/subscription`;
+        const subscriptions = await this.doGet(url) as Subscription[];
+        if (!subscriptions) {
+            return Promise.resolve([]);
+        }
+        return Promise.resolve(subscriptions);
+    }
+    async getSubscription(id: string): Promise<Subscription | undefined> {
+        if (this.isNullOrWhitespace(id)) {
+            throw new Error('Required parameter is missing.');
+        }
+        const url = `${base_url}/api/subscription/${id}`;
+        const subscription = await this.doGet(url)
+            .catch(err => {
+                if (err.response.status === 404) {
+                    return Promise.resolve(undefined);
+                }
+                throw err;
+            });
+        return Promise.resolve(subscription);
+    }
+    async createWebhook(config: WebhookConfig): Promise<Subscription | undefined> {
+        if (!WebhookConfig.isValid(config)) {
+            throw new Error('Required parameter is missing.');
+        }
+        const url = `${base_url}/api/subscription`;
+        const subscription = await this.doPost(url, config);
+        return Promise.resolve(subscription);
+    }
+    async deleteSubscription(id: string): Promise<Subscription | undefined> {
+        if (this.isNullOrWhitespace(id)) {
+            throw new Error('Required parameter is missing.');
+        }
+        const url = `${base_url}/api/subscription/${id}`;
+        const subscription = await this.doDelete(url)
+            .catch(err => {
+                if (err.response.status === 404) {
+                    return Promise.resolve(undefined);
+                }
+                throw err;
+            });
+        return Promise.resolve(subscription);
+    }
+
 }
