@@ -20,6 +20,9 @@ export class LyticsClient {
         var wasSuccess: boolean = false;
         const response = await axios.request(config);
         const data = response.data;
+        if (!data && response.status === 204) {
+            return Promise.resolve(undefined);
+        }
         if (data.status === 200 || data.status === 201) {
             if (data.message === 'Not Found') {
                 return Promise.resolve(undefined);
@@ -523,7 +526,7 @@ export class LyticsClient {
         const subscription = await this.doPost(url, config);
         return Promise.resolve(subscription);
     }
-    async deleteSubscription(id: string): Promise<Subscription | undefined> {
+    async deleteSubscription(id: string): Promise<boolean> {
         if (this.isNullOrWhitespace(id)) {
             throw new Error('Required parameter is missing.');
         }
@@ -531,11 +534,11 @@ export class LyticsClient {
         const subscription = await this.doDelete(url)
             .catch(err => {
                 if (err.response.status === 404) {
-                    return Promise.resolve(undefined);
+                    return Promise.resolve(false);
                 }
                 throw err;
             });
-        return Promise.resolve(subscription);
+        return Promise.resolve(true);
     }
 
 }

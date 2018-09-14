@@ -529,7 +529,7 @@ describe('setWhitelistFieldStatus', function () {
         before.sort();
         after.sort();
         assert.equal(after.length, before.length);
-        for(var i=0; i<before.length; i++) {
+        for (var i = 0; i < before.length; i++) {
             assert.equal(after[i], before[i]);
         }
     });
@@ -616,19 +616,22 @@ describe('createWebhook', function () {
             .then(result => assert.isTrue(false))
             .catch(err => assert.isTrue(true));
     });
-    it('should return a subscription when the webhook config object is properly configured', async function () {;
+    it('should return a subscription when the webhook config object is properly configured', function () {
+        ;
         const lytics = new LyticsClient(apikey);
         const config = new WebhookConfig();
-        config.name = 'test1 name';
-        config.description = 'test1 description';
-        config.webhook_url = new URL("https://localhost.com");
+        const d = new Date();
+        config.name = `CREATE UNIT TEST ${d}`;
+        config.description = `subscription for unit test ${d}`;
         config.segment_ids.push('5d76aaa11136c5f58aaeed405fb2a6a5');
         config.segment_ids.push('eb1879ebb2338b58bd0ee3a5660e28d4');
-        var subscription = await lytics.createWebhook(config);
-        assert.isDefined(subscription);
-        assert.equal(subscription!.name, config.name);
-        assert.equal(subscription!.description, config.description);
-        assert.equal(subscription!.segment_ids.length, config.segment_ids.length);
+        config.webhook_url = new URL('https://localhost/test');
+        lytics.createWebhook(config).then(subscription => {
+            assert.isDefined(subscription);
+            assert.equal(subscription!.name, config.name);
+            assert.equal(subscription!.description, config.description);
+            assert.equal(subscription!.segment_ids.length, config.segment_ids.length);
+        });
     });
 });
 describe('deleteSubscription', function () {
@@ -638,11 +641,66 @@ describe('deleteSubscription', function () {
             .then(result => assert.isTrue(false))
             .catch(err => assert.isTrue(true));
     });
-    it('should return a subscription when a subscription is deleted', async function () {;
-        const id = '1beee30439bf8634b5a73e48c67c80be';
+    it('should return when a subscription is deleted', function () {
+        //
+        //create a subscription
         const lytics = new LyticsClient(apikey);
-        var subscription = await lytics.deleteSubscription(id);
-        assert.isDefined(subscription);
-        assert.equal(subscription!.id, id);
+        const config = new WebhookConfig();
+        const d = new Date();
+        config.name = `DELETE UNIT TEST ${d}`;
+        config.description = `subscription for unit test ${d}`;
+        config.segment_ids.push('5d76aaa11136c5f58aaeed405fb2a6a5');
+        config.segment_ids.push('eb1879ebb2338b58bd0ee3a5660e28d4');
+        config.webhook_url = new URL('https://localhost/test');
+        lytics.createWebhook(config)
+            .then(subscription => {
+                assert.isDefined(subscription);
+                assert.isDefined(subscription!.id);
+                const id = subscription!.id!;
+                //
+                //ensure subscription exists
+                lytics.getSubscription(subscription!.id!).then(subscription => {
+                    assert.equal(subscription!.id, id);
+                    //
+                    //delete subscription
+                    lytics.deleteSubscription(id).then(wasDeleted => {
+                        assert.isTrue(wasDeleted);
+                        //
+                        //ensure subscription does not exist
+                        lytics.getSubscription(id).then(subscription => {
+                            assert.isUndefined(subscription);
+                        })
+                    })
+                });
+            })
+
     });
+    // it('should return when a subscription is deleted', async function () {
+    //     //
+    //     //create a subscription
+    //     const lytics = new LyticsClient(apikey);
+    //     const config = new WebhookConfig();
+    //     const d = new Date();
+    //     config.name = `DELETE UNIT TEST ${d}`;
+    //     config.description = `subscription for unit test ${d}`;
+    //     config.segment_ids.push('5d76aaa11136c5f58aaeed405fb2a6a5');
+    //     config.segment_ids.push('eb1879ebb2338b58bd0ee3a5660e28d4');
+    //     config.webhook_url = new URL('https://localhost/test');
+    //     var subscription = await lytics.createWebhook(config);
+    //     assert.isDefined(subscription);
+    //     assert.isDefined(subscription!.id);
+    //     const id = subscription!.id!;
+    //     //
+    //     //ensure subscription exists
+    //     subscription = await lytics.getSubscription(subscription!.id!);
+    //     assert.equal(subscription!.id, id);
+    //     //
+    //     //delete subscription
+    //     var wasDeleted = await lytics.deleteSubscription(id);
+    //     assert.isTrue(wasDeleted);
+    //     //
+    //     //ensure subscription does not exist
+    //     subscription = await lytics.getSubscription(id);
+    //     assert.isUndefined(subscription);
+    // });
 });
