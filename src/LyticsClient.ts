@@ -3,7 +3,7 @@ import axios, { AxiosRequestConfig, } from 'axios';
 import qs = require('query-string');
 import { LyticsAccount, DataStream, DataStreamField, TableSchema, TableSchemaField, TableSchemaFieldInfo, Query, CollectResultInfo, SegmentCollection, Segment, Campaign, CampaignVariation, ContentClassification, CampaignVariationDetailOverride, Topic, TopicUrlCollection, Subscription, WebhookConfig } from './types';
 import { isArray } from 'util';
-import { Url } from 'url';
+import { URL } from 'url';
 
 const base_url = 'https://api.lytics.io';
 export class LyticsClient {
@@ -375,7 +375,7 @@ export class LyticsClient {
             });
         return Promise.resolve(variation);
     }
-    async updateCampaignVariation(variationId: string, variation:CampaignVariation): Promise<CampaignVariation | undefined> {
+    async updateCampaignVariation(variationId: string, variation: CampaignVariation): Promise<CampaignVariation | undefined> {
         if (this.isNullOrWhitespace(variationId) || !variation) {
             throw new Error('Required parameter is missing.');
         }
@@ -389,7 +389,7 @@ export class LyticsClient {
         }
         return Promise.resolve(variation.detail_override);
     }
-    async updateCampaignVariationDetailOverride(variationId: string, override:CampaignVariationDetailOverride): Promise<CampaignVariation | undefined> {
+    async updateCampaignVariationDetailOverride(variationId: string, override: CampaignVariationDetailOverride): Promise<CampaignVariation | undefined> {
         if (this.isNullOrWhitespace(variationId) || !override) {
             throw new Error('Required parameter is missing.');
         }
@@ -413,10 +413,10 @@ export class LyticsClient {
         const args2 = args ? args.map(arg => `"${arg}"`) : [''];
         const expr = `${functionName}(${args2.join(',')})`;
         const lql = `SELECT ${expr} AS value, email(email) AS email FROM test_stream INTO user BY email ALIAS test_query`;
-        var response = await this.testQuery(lql, { email:"test@test.com"});
+        var response = await this.testQuery(lql, { email: "test@test.com" });
         return Promise.resolve(response.value);
     }
-    async getWhitelistFields(aid:number): Promise<string[]> {
+    async getWhitelistFields(aid: number): Promise<string[]> {
         if (aid === 0) {
             throw new Error('Required parameter is missing.');
         }
@@ -439,7 +439,7 @@ export class LyticsClient {
      * @param add 
      * @returns true if a change was made; false if no change was made. For example, if the field "email" is already whitelisted and try to add "email" to the whitelist, this function returns false.
      */
-    async setWhitelistFieldStatus(aid:number, fieldName: string, add: boolean): Promise<boolean> {
+    async setWhitelistFieldStatus(aid: number, fieldName: string, add: boolean): Promise<boolean> {
         if (this.isNullOrWhitespace(fieldName)) {
             throw new Error('Required parameter is missing.');
         }
@@ -471,7 +471,7 @@ export class LyticsClient {
         return this.doPost(url, data);
     }
 
-    async getTopics(limit:number = 500): Promise<Topic[]> {
+    async getTopics(limit: number = 500): Promise<Topic[]> {
         const url = `${base_url}/api/content/topic?limit=${limit}`;
         const topics = await this.doGet(url) as Topic[];
         if (!topics) {
@@ -487,7 +487,7 @@ export class LyticsClient {
         const topic = await this.doGet(url);
         return Promise.resolve(topic);
     }
-    async getTopicUrls(label: string, limit:number = 10): Promise<TopicUrlCollection> {
+    async getTopicUrls(label: string, limit: number = 10): Promise<TopicUrlCollection> {
         if (this.isNullOrWhitespace(label)) {
             throw new Error('Required parameter is missing.');
         }
@@ -523,6 +523,17 @@ export class LyticsClient {
             throw new Error('Required parameter is missing.');
         }
         const url = `${base_url}/api/subscription`;
+        const subscription = await this.doPost(url, config);
+        return Promise.resolve(subscription);
+    }
+    async updateWebhook(id:string, config: WebhookConfig): Promise<Subscription | undefined> {
+        if (!id || id.trim().length === 0) {
+            throw new Error('Subscription id is required.');
+        }
+        if (!WebhookConfig.isValid(config)) {
+            throw new Error('Required parameter is missing.');
+        }
+        const url = `${base_url}/api/subscription/${id}`;
         const subscription = await this.doPost(url, config);
         return Promise.resolve(subscription);
     }

@@ -1,4 +1,4 @@
-import { Url } from "url";
+import { URL } from 'url';
 
 export class LyticsAccount {
     aid: number = 0;
@@ -423,13 +423,16 @@ export class Subscription {
     object: string | undefined;
     segment_ids: string[] = [];
     query: string | undefined;
+    webhook_url: URL | undefined;
+    headers: any | undefined;
+    user_fields: string[] = [];
 }
 export class WebhookConfig {
     channel: string = "webhook";
     version: string = "new";
     name: string | undefined;
     description: string | undefined;
-    webhook_url: Url | undefined;
+    webhook_url: URL | undefined;
     headers: any | undefined;
     segment_ids: string[] = [];
     user_fields: string[] = [];
