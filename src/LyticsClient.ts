@@ -1,7 +1,7 @@
 'use strict';
 import axios, { AxiosRequestConfig, } from 'axios';
 import qs = require('query-string');
-import { LyticsAccount, DataStream, DataStreamField, TableSchema, TableSchemaField, TableSchemaFieldInfo, Query, CollectResultInfo, SegmentCollection, Segment, Campaign, CampaignVariation, ContentClassification, CampaignVariationDetailOverride, Topic, TopicUrlCollection, Subscription, WebhookConfig } from './types';
+import { LyticsAccount, DataStream, DataStreamField, TableSchema, TableSchemaField, TableSchemaFieldInfo, Query, CollectResultInfo, SegmentCollection, Segment, Campaign, CampaignVariation, ContentClassification, CampaignVariationDetailOverride, Topic, TopicUrlCollection, Subscription, WebhookConfig, CreateAccessTokenConfig, LyticsAccessToken } from './types';
 import { isArray } from 'util';
 import { URL } from 'url';
 
@@ -552,4 +552,18 @@ export class LyticsClient {
         return Promise.resolve(true);
     }
 
+    static async createAccessToken(apiKey:string, config:CreateAccessTokenConfig): Promise<LyticsAccessToken | undefined> {
+        if (!apiKey || apiKey.trim().length === 0) {
+            throw new Error('Required parameter is missing.');
+        }
+        if (!config.name || config.name.trim().length === 0) {
+            throw new Error('Required parameter is missing.');
+        }
+        if (!config || !config.scopes || config.scopes.length === 0) {
+            throw new Error('Required parameter is missing.');
+        }
+        const client = new LyticsClient(apiKey);
+        const url = `${base_url}/api/auth/createtoken`;
+        return client.doPost(url, config);
+    }
 }

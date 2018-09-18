@@ -449,3 +449,52 @@ export class WebhookConfig {
         return false;
     }
 }
+export class TokenScopes {
+    static readonly admin:string = "admin";
+    static readonly data:string = "data";
+    static readonly data_write:string = "data_write";
+    static readonly content_manager:string = "content_manager";
+    static readonly segment_manager:string = "segment_manager";
+    static readonly marketer:string = "marketer";
+    static readonly observer:string = "observer";
+    static readonly data_manager:string = "data_manager";
+    static readonly campaign_manager:string = "campaign_manager";
+    static readonly general_manager:string = "general_manager";
+} 
+export class CreateAccessTokenConfig {
+    expires: string | undefined;
+    scopes: string[] = [];
+    name: string | undefined;
+}
+export class LyticsAccessToken {
+    id: string | undefined;
+    aid: number = 0;
+    name: string | undefined;
+    account_id: string | undefined;
+    provider_id: string | undefined;
+    provider_name: string | undefined;
+    provider_slug: string | undefined;
+    auth_type: string | undefined;
+    description: string | undefined;
+    config: LyticsAccessTokenConfig[] = [];
+    scopes: string[] = [];
+    ttl: string | undefined;
+    created: Date | undefined;
+    updated: Date | undefined;
+    expires: Date | undefined;
+}
+export class LyticsAccessTokenReader {
+    static getApiKey = (token: LyticsAccessToken): string | undefined => {
+        if (token.config) {
+            const config = token.config.find(c => c.name === 'api_key');
+            if (config) {
+                return config.value;
+            }
+        }
+        return undefined;
+    }
+}
+export class LyticsAccessTokenConfig {
+    name: string | undefined;
+    value: string | undefined;
+}
