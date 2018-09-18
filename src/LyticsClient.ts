@@ -1,12 +1,20 @@
 'use strict';
 import axios, { AxiosRequestConfig, } from 'axios';
 import qs = require('query-string');
-import { LyticsAccount, DataStream, DataStreamField, TableSchema, TableSchemaField, TableSchemaFieldInfo, Query, CollectResultInfo, SegmentCollection, Segment, Campaign, CampaignVariation, ContentClassification, CampaignVariationDetailOverride, Topic, TopicUrlCollection, Subscription, WebhookConfig, CreateAccessTokenConfig, LyticsAccessToken } from './types';
+import { LyticsAccount, DataStream, DataStreamField, TableSchema, TableSchemaField, TableSchemaFieldInfo, Query, CollectResultInfo, SegmentCollection, Segment, Campaign, CampaignVariation, ContentClassification, CampaignVariationDetailOverride, Topic, TopicUrlCollection, Subscription, WebhookConfig, CreateAccessTokenConfig, LyticsAccessToken, TokenScope } from './types';
 import { isArray } from 'util';
 import { URL } from 'url';
 
-const base_url = 'https://api.lytics.io';
+export class LyticsClientOptions {
+    base_url: string = 'https://api.lytics.io';
+    readonly apikey: string;
+    constructor(apikey: string) {
+        this.apikey = apikey;
+    }
+}
+
 export class LyticsClient {
+    private base_url = 'https://api.lytics.io';
     private apikey: string;
     private headers: any;
     constructor(apikey: string) {
@@ -15,6 +23,11 @@ export class LyticsClient {
             'Authorization': this.apikey,
             'Content-Type': 'application/json'
         };
+    }
+    static create(options: LyticsClientOptions): LyticsClient {
+        const client = new LyticsClient(options.apikey!);
+        client.base_url = options.base_url;
+        return client;
     }
     private async doRequest(config: AxiosRequestConfig, dataHandler?: (data: string) => any): Promise<any> {
         var wasSuccess: boolean = false;
@@ -71,12 +84,12 @@ export class LyticsClient {
     }
 
     async getAccounts(): Promise<LyticsAccount[]> {
-        const url = `${base_url}/api/account`;
+        const url = `${this.base_url}/api/account`;
         return this.doGet(url);
     }
 
     async getAccount(aid: number): Promise<LyticsAccount | undefined> {
-        const url = `${base_url}/api/account/${aid}`;
+        const url = `${this.base_url}/api/account/${aid}`;
         return this.doGet(url)
             .catch(err => {
                 if (err.response.status === 404) {
@@ -86,7 +99,7 @@ export class LyticsClient {
             });
     }
     async getStreams(): Promise<DataStream[]> {
-        const url = `${base_url}/api/schema/_streams`;
+        const url = `${this.base_url}/api/schema/_streams`;
         return this.doGet(url);
     }
     async getStream(name: string): Promise<DataStream | undefined> {
@@ -118,7 +131,7 @@ export class LyticsClient {
         if (this.isNullOrWhitespace(tableName)) {
             throw new Error('Required parameter is missing.');
         }
-        const url = `${base_url}/api/schema/${tableName}`;
+        const url = `${this.base_url}/api/schema/${tableName}`;
         const data = await this.doGet(url);
         if (Object.keys(data).length == 0) {
             return Promise.resolve(undefined);
@@ -129,7 +142,7 @@ export class LyticsClient {
         if (this.isNullOrWhitespace(tableName) || this.isNullOrWhitespace(fieldName)) {
             throw new Error('Required parameter is missing.');
         }
-        const url = `${base_url}/api/schema/${tableName}/fieldinfo?fields=${fieldName}`;
+        const url = `${this.base_url}/api/schema/${tableName}/fieldinfo?fields=${fieldName}`;
         const data = await this.doGet(url)
             .catch(err => {
                 if (err.response.status === 400) {
@@ -152,7 +165,7 @@ export class LyticsClient {
         if (this.isNullOrWhitespace(tableName) || this.isNullOrWhitespace(fieldName) || !fieldValue) {
             throw new Error('Required parameter is missing.');
         }
-        const url = `${base_url}/api/entity/${tableName}/${fieldName}/${fieldValue}?wait=${wait}`;
+        const url = `${this.base_url}/api/entity/${tableName}/${fieldName}/${fieldValue}?wait=${wait}`;
         const data = await this.doGet(url)
             .catch(err => {
                 if (err.response.status == 500) {
@@ -164,14 +177,14 @@ export class LyticsClient {
     }
 
     async getQueries(): Promise<Query[]> {
-        const url = `${base_url}/api/query`;
+        const url = `${this.base_url}/api/query`;
         return this.doGet(url);
     }
     async getQuery(alias: string): Promise<Query | undefined> {
         if (this.isNullOrWhitespace(alias)) {
             throw new Error('Required parameter is missing.');
         }
-        const url = `${base_url}/api/query/${alias}`;
+        const url = `${this.base_url}/api/query/${alias}`;
         const data = await this.doGet(url)
             .catch(err => {
                 if (err.response.status === 404) {
@@ -185,14 +198,14 @@ export class LyticsClient {
         if (this.isNullOrWhitespace(lql)) {
             throw new Error('Required parameter is missing.');
         }
-        const url = `${base_url}/api/query`;
+        const url = `${this.base_url}/api/query`;
         return this.doPost(url, lql);
     }
     async deleteQuery(alias: string): Promise<boolean> {
         if (this.isNullOrWhitespace(alias)) {
             throw new Error('Required parameter is missing.');
         }
-        const url = `${base_url}/api/query/${alias}`;
+        const url = `${this.base_url}/api/query/${alias}`;
         const config = {
             url: url,
             method: 'delete',
@@ -226,7 +239,7 @@ export class LyticsClient {
         }
         const headers = this.headers;
         headers['Content-Type'] = 'application/csv';
-        const url = `${base_url}/api/query/_tolql`;
+        const url = `${this.base_url}/api/query/_tolql`;
         const config = {
             url: url,
             method: 'post',
@@ -242,7 +255,7 @@ export class LyticsClient {
             throw new Error('Required parameter is missing.');
         }
         const params = qs.stringify(record);
-        const url = `${base_url}/api/query/_test?${params}`;
+        const url = `${this.base_url}/api/query/_test?${params}`;
         return this.doPost(url, lql);
     }
 
@@ -250,12 +263,12 @@ export class LyticsClient {
         if (this.isNullOrWhitespace(stream) || !data) {
             throw new Error('Required parameter is missing.');
         }
-        const url = `${base_url}/collect/json/${stream}`;
+        const url = `${this.base_url}/collect/json/${stream}`;
         const result = await this.doPost(url, data);
         return Promise.resolve(result);
     }
     async getSegments(): Promise<Segment[]> {
-        const url = `${base_url}/api/segment`;
+        const url = `${this.base_url}/api/segment`;
         const segments = await this.doGet(url) as Segment[];
         if (!segments) {
             return Promise.resolve([]);
@@ -266,7 +279,7 @@ export class LyticsClient {
         if (this.isNullOrWhitespace(idOrSlug)) {
             throw new Error('Required parameter is missing.');
         }
-        const url = `${base_url}/api/segment/${idOrSlug}`;
+        const url = `${this.base_url}/api/segment/${idOrSlug}`;
         const segment = await this.doGet(url)
             .catch(err => {
                 if (err.response.status === 404) {
@@ -278,7 +291,7 @@ export class LyticsClient {
     }
     async getSegmentCollection(ids?: string[]): Promise<SegmentCollection> {
         const col = new SegmentCollection();
-        const url = `${base_url}/api/segment`;
+        const url = `${this.base_url}/api/segment`;
         const segments = await this.doGet(url) as Segment[];
         if (!segments) {
             return Promise.resolve(col);
@@ -308,7 +321,7 @@ export class LyticsClient {
     }
 
     async getCampaigns(): Promise<Campaign[]> {
-        const url = `${base_url}/api/program/campaign`;
+        const url = `${this.base_url}/api/program/campaign`;
         const campaigns = await this.doGet(url) as Campaign[];
         if (!campaigns) {
             return Promise.resolve([]);
@@ -320,7 +333,7 @@ export class LyticsClient {
         if (this.isNullOrWhitespace(id)) {
             throw new Error('Required parameter is missing.');
         }
-        const url = `${base_url}/api/program/campaign/${id}`;
+        const url = `${this.base_url}/api/program/campaign/${id}`;
         const campaign = await this.doGet(url)
             .catch(err => {
                 if (err.response.status === 404) {
@@ -333,7 +346,7 @@ export class LyticsClient {
 
     async getCampaignVariationsAll(): Promise<Map<string, CampaignVariation[]>> {
         const map = new Map<string, CampaignVariation[]>();
-        const url = `${base_url}/api/program/campaign/variation`;
+        const url = `${this.base_url}/api/program/campaign/variation`;
         const variations = await this.doGet(url) as CampaignVariation[];
         if (!variations) {
             return map;
@@ -365,7 +378,7 @@ export class LyticsClient {
         if (this.isNullOrWhitespace(variationId)) {
             throw new Error('Required parameter is missing.');
         }
-        const url = `${base_url}/api/program/campaign/variation/${variationId}`;
+        const url = `${this.base_url}/api/program/campaign/variation/${variationId}`;
         const variation = await this.doGet(url)
             .catch(err => {
                 if (err.response.status === 404) {
@@ -379,7 +392,7 @@ export class LyticsClient {
         if (this.isNullOrWhitespace(variationId) || !variation) {
             throw new Error('Required parameter is missing.');
         }
-        const url = `${base_url}/api/program/campaign/variation/${variationId}`;
+        const url = `${this.base_url}/api/program/campaign/variation/${variationId}`;
         return this.doPost(url, variation);
     }
     async getCampaignVariationDetailOverride(variationId: string): Promise<CampaignVariationDetailOverride | undefined> {
@@ -399,11 +412,11 @@ export class LyticsClient {
     }
 
     async classifyUsingText(text: string, draft: boolean = true): Promise<ContentClassification | undefined> {
-        const url = `${base_url}/api/content/doc/classify?draft=${draft}`;
+        const url = `${this.base_url}/api/content/doc/classify?draft=${draft}`;
         return this.doPost(url, { "text": text });
     }
     async classifyUsingUrl(url: string, draft: boolean = true): Promise<ContentClassification | undefined> {
-        const url2 = `${base_url}/api/content/doc/classify?draft=${draft}`;
+        const url2 = `${this.base_url}/api/content/doc/classify?draft=${draft}`;
         return this.doPost(url2, { "url": url });
     }
     async testFunction(functionName: string, args?: string[]): Promise<any | undefined> {
@@ -467,12 +480,12 @@ export class LyticsClient {
         const data = {
             "whitelist_fields": fields
         };
-        const url = `${base_url}/api/account/${aid}`;
+        const url = `${this.base_url}/api/account/${aid}`;
         return this.doPost(url, data);
     }
 
     async getTopics(limit: number = 500): Promise<Topic[]> {
-        const url = `${base_url}/api/content/topic?limit=${limit}`;
+        const url = `${this.base_url}/api/content/topic?limit=${limit}`;
         const topics = await this.doGet(url) as Topic[];
         if (!topics) {
             return Promise.resolve([]);
@@ -483,7 +496,7 @@ export class LyticsClient {
         if (this.isNullOrWhitespace(label)) {
             throw new Error('Required parameter is missing.');
         }
-        const url = `${base_url}/api/content/topic/${label}`;
+        const url = `${this.base_url}/api/content/topic/${label}`;
         const topic = await this.doGet(url);
         return Promise.resolve(topic);
     }
@@ -491,13 +504,13 @@ export class LyticsClient {
         if (this.isNullOrWhitespace(label)) {
             throw new Error('Required parameter is missing.');
         }
-        const url = `${base_url}/api/content/topic/${label}/urls?limit=${limit}`;
+        const url = `${this.base_url}/api/content/topic/${label}/urls?limit=${limit}`;
         const collection = await this.doGet(url)
         return Promise.resolve(collection);
     }
 
     async getSubscriptions(): Promise<Subscription[]> {
-        const url = `${base_url}/api/subscription`;
+        const url = `${this.base_url}/api/subscription`;
         const subscriptions = await this.doGet(url) as Subscription[];
         if (!subscriptions) {
             return Promise.resolve([]);
@@ -508,7 +521,7 @@ export class LyticsClient {
         if (this.isNullOrWhitespace(id)) {
             throw new Error('Required parameter is missing.');
         }
-        const url = `${base_url}/api/subscription/${id}`;
+        const url = `${this.base_url}/api/subscription/${id}`;
         const subscription = await this.doGet(url)
             .catch(err => {
                 if (err.response.status === 404) {
@@ -522,18 +535,18 @@ export class LyticsClient {
         if (!WebhookConfig.isValid(config)) {
             throw new Error('Required parameter is missing.');
         }
-        const url = `${base_url}/api/subscription`;
+        const url = `${this.base_url}/api/subscription`;
         const subscription = await this.doPost(url, config);
         return Promise.resolve(subscription);
     }
-    async updateWebhook(id:string, config: WebhookConfig): Promise<Subscription | undefined> {
+    async updateWebhook(id: string, config: WebhookConfig): Promise<Subscription | undefined> {
         if (!id || id.trim().length === 0) {
             throw new Error('Subscription id is required.');
         }
         if (!WebhookConfig.isValid(config)) {
             throw new Error('Required parameter is missing.');
         }
-        const url = `${base_url}/api/subscription/${id}`;
+        const url = `${this.base_url}/api/subscription/${id}`;
         const subscription = await this.doPost(url, config);
         return Promise.resolve(subscription);
     }
@@ -541,7 +554,7 @@ export class LyticsClient {
         if (this.isNullOrWhitespace(id)) {
             throw new Error('Required parameter is missing.');
         }
-        const url = `${base_url}/api/subscription/${id}`;
+        const url = `${this.base_url}/api/subscription/${id}`;
         const subscription = await this.doDelete(url)
             .catch(err => {
                 if (err.response.status === 404) {
@@ -551,19 +564,67 @@ export class LyticsClient {
             });
         return Promise.resolve(true);
     }
+    
+    async getTokenScopes() : Promise<TokenScope[]> {
+        return Promise.resolve(TokenScope.supportedScopes);
+    }
 
-    static async createAccessToken(apiKey:string, config:CreateAccessTokenConfig): Promise<LyticsAccessToken | undefined> {
-        if (!apiKey || apiKey.trim().length === 0) {
-            throw new Error('Required parameter is missing.');
-        }
-        if (!config.name || config.name.trim().length === 0) {
+    async createAccessToken(config: CreateAccessTokenConfig): Promise<LyticsAccessToken | undefined> {
+        if (!config || !config.name || config.name.trim().length === 0) {
             throw new Error('Required parameter is missing.');
         }
         if (!config || !config.scopes || config.scopes.length === 0) {
             throw new Error('Required parameter is missing.');
         }
-        const client = new LyticsClient(apiKey);
-        const url = `${base_url}/api/auth/createtoken`;
-        return client.doPost(url, config);
+        const url = `${this.base_url}/api/auth/createtoken`;
+        return this.doPost(url, config);
+    }
+
+    async getAccessTokens(aid: number): Promise<LyticsAccessToken[]> {
+        const account = await this.getAccount(aid);
+        if (!account) {
+            return Promise.resolve([]);
+        }
+        const url = `${this.base_url}/api/auth?auth_type=api_token&account_id=${account.id}`;
+        const tokens = await this.doGet(url) as LyticsAccessToken[];
+        if (!tokens) {
+            return Promise.resolve([]);
+        }
+        return Promise.resolve(tokens);
+    }
+
+    async getAccessToken(authid: string, aid: number): Promise<LyticsAccessToken | undefined> {
+        const account = await this.getAccount(aid);
+        if (!account) {
+            return Promise.resolve(undefined);
+        }
+        const url = `${this.base_url}/api/auth/${authid}?account_id=${account.id}`;
+        return this.doGet(url)
+            .catch(err => {
+                if (err.response.status == 404) {
+                    return Promise.resolve(undefined);
+                }
+            });
+    }
+
+    async deleteAccessToken(authid: string, aid: number): Promise<boolean> {
+        if (this.isNullOrWhitespace(authid)) {
+            throw new Error('Required parameter is missing.');
+        }
+        const account = await this.getAccount(aid);
+        if (!account) {
+            return Promise.resolve(false);
+        }
+        const url = `${this.base_url}/api/auth/${authid}?account_id=${account.id}`;
+        const config = {
+            url: url,
+            method: 'delete',
+            headers: this.headers
+        };
+        const response = await axios.request(config);
+        if (response.status === 204) {
+            return Promise.resolve(true);
+        }
+        return Promise.resolve(false);
     }
 }

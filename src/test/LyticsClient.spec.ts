@@ -1,7 +1,8 @@
-import { LyticsClient } from '../LyticsClient';
+import { LyticsClient, LyticsClientOptions } from '../LyticsClient';
 import { assert } from 'chai';
-import { TableSchemaFieldInfo, CollectResultInfo, WebhookConfig, CreateAccessTokenConfig, TokenScopes, LyticsAccessTokenReader } from '../types';
+import { TableSchemaFieldInfo, CollectResultInfo, WebhookConfig, CreateAccessTokenConfig, LyticsAccessTokenReader, LyticsAccessTokenConfig } from '../types';
 import { URL } from 'url';
+import { isArray } from 'util';
 const settings = require('./settings');
 
 const apikey: string = settings.lytics_apikey;
@@ -735,18 +736,19 @@ describe('deleteSubscription', function () {
 
 describe('createAccessToken', function () {
     it('should throw error when trying no values are set on the config object', async function () {
+        const lytics = new LyticsClient(apikey);
         const config = new CreateAccessTokenConfig();
-        LyticsClient.createAccessToken(apikey, config)
+        lytics.createAccessToken(config)
             .then(result => assert.isTrue(false))
             .catch(err => assert.isTrue(true));
     });
     it('should return an access token', async function () {
+        const lytics = new LyticsClient(apikey);
         const config = new CreateAccessTokenConfig();
         config.expires = '10m';
         config.name = 'unit_test_token';
-        config.scopes.push(TokenScopes.admin);
-        config.scopes.push(TokenScopes.campaign_manager);
-        const token = await LyticsClient.createAccessToken(apikey, config);
+        config.scopes.push('admin');
+        const token = await lytics.createAccessToken(config);
         assert.isDefined(token);
         assert.equal(token!.description, config.name);
         assert.isDefined(token!.config);
@@ -755,5 +757,54 @@ describe('createAccessToken', function () {
         const client = new LyticsClient(apikey2!);
         const account = await client.getAccount(aid);
         assert.isDefined(account);
+    });
+});
+
+describe('getAccessTokens', function () {
+    it('should return undefined if an aid that does not exist is used', async function () {
+        const lytics = new LyticsClient(apikey);
+        lytics.getAccessTokens(111231231)
+            .then(result => assert.isTrue(false))
+            .catch(err => assert.isTrue(true));
+    });
+    it('should return an array', async function () {
+        const lytics = new LyticsClient(apikey);
+        const tokens = await lytics.getAccessTokens(aid);
+        assert.isDefined(tokens);
+    });
+});
+
+describe('getAccessToken', function () {
+    it('should return undefined when an access token that does not exist is specified', async function() {
+        const lytics = new LyticsClient(apikey);
+        const token = await lytics.getAccessToken('xxxxx', aid);
+        assert.isUndefined(token);
+    });
+    it('should return an access token', async function () {
+        const lytics = new LyticsClient(apikey);
+        const config = new CreateAccessTokenConfig();
+        config.name = 'test-token';
+        config.expires = '10m';
+        config.scopes.push('admin');
+        const token = await lytics.createAccessToken(config);
+        assert.isDefined(token);
+        assert.isDefined(token!.id);
+        assert.equal(token!.description, config.name);
+        const token2 = await lytics.getAccessToken(token!.id!, aid);
+        assert.isDefined(token2);
+        assert.equal(token2!.id, token!.id);
+        const wasDeleted = await lytics.deleteAccessToken(token!.id!, aid);
+        assert.isTrue(wasDeleted);
+        const token3 = await lytics.getAccessToken(token!.id!, aid)
+        assert.isUndefined(token3);
+    });
+});
+
+describe('getTokenScopes', function () {
+    it('should return an array', async function () {
+        const lytics = new LyticsClient(apikey);
+        const scopes = await lytics.getTokenScopes();
+        assert.isDefined(scopes);
+        assert.isTrue(isArray(scopes));
     });
 });

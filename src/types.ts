@@ -449,18 +449,22 @@ export class WebhookConfig {
         return false;
     }
 }
-export class TokenScopes {
-    static readonly admin:string = "admin";
-    static readonly data:string = "data";
-    static readonly data_write:string = "data_write";
-    static readonly content_manager:string = "content_manager";
-    static readonly segment_manager:string = "segment_manager";
-    static readonly marketer:string = "marketer";
-    static readonly observer:string = "observer";
-    static readonly data_manager:string = "data_manager";
-    static readonly campaign_manager:string = "campaign_manager";
-    static readonly general_manager:string = "general_manager";
-} 
+export class TokenScope {
+    constructor(readonly scope:string, readonly description:string) {
+    }
+    static readonly supportedScopes:TokenScope[] = [
+        new TokenScope('admin', 'can manage the account (create users, grant roles) as well as all other roles'),
+        new TokenScope('data', ''),
+        new TokenScope('data_write', ''),
+        new TokenScope('content_manager', ''),
+        new TokenScope('segment_manager', ''),
+        new TokenScope('marketer', ''),
+        new TokenScope('observer', ''),
+        new TokenScope('data_manager', ''),
+        new TokenScope('campaign_manager', ''),
+        new TokenScope('general_manager', '')
+    ];
+}
 export class CreateAccessTokenConfig {
     expires: string | undefined;
     scopes: string[] = [];
