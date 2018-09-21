@@ -423,9 +423,18 @@ export class Subscription {
     object: string | undefined;
     segment_ids: string[] = [];
     query: string | undefined;
-    webhook_url: URL | undefined;
+    config: SubscriptionConfig | undefined;
+}
+export class SubscriptionConfig {
+    channel: string | undefined;
+    description: string | undefined;
     headers: any | undefined;
-    user_fields: string[] = [];
+    name: string | undefined;
+    segment_ids: string[] = [];
+    subscription_id: string | undefined;
+    user_fields: string[] = []; 
+    webhook_url: URL | undefined;
+    version: string | undefined;
 }
 export class WebhookConfig {
     channel: string = "webhook";
