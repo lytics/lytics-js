@@ -1,7 +1,7 @@
 'use strict';
 import axios, { AxiosRequestConfig, } from 'axios';
 import qs = require('query-string');
-import { LyticsAccount, DataStream, DataStreamField, TableSchema, TableSchemaField, TableSchemaFieldInfo, Query, CollectResultInfo, SegmentCollection, Segment, Campaign, CampaignVariation, ContentClassification, CampaignVariationDetailOverride, Topic, TopicUrlCollection, Subscription, WebhookConfig, CreateAccessTokenConfig, LyticsAccessToken, TokenScope } from './types';
+import { LyticsAccount, DataStream, DataStreamField, TableSchema, TableSchemaField, TableSchemaFieldInfo, Query, CollectResultInfo, SegmentCollection, Segment, Campaign, CampaignVariation, ContentClassification, CampaignVariationDetailOverride, Topic, TopicUrlCollection, Subscription, WebhookConfig, CreateAccessTokenConfig, LyticsAccessToken, TokenScope, LyticsAccountSetting } from './types';
 import { isArray } from 'util';
 import { URL } from 'url';
 
@@ -69,6 +69,18 @@ export class LyticsClient {
         const config = {
             url: url,
             method: 'post',
+            data: data,
+            headers: this.headers
+        };
+        return this.doRequest(config, dataHandler);
+    }
+    private async doPut(url: string, data: any, dataHandler?: (data: string) => any): Promise<any> {
+        if (typeof data === "object") {
+            data = JSON.stringify(data);
+        }
+        const config = {
+            url: url,
+            method: 'put',
             data: data,
             headers: this.headers
         };
@@ -626,5 +638,66 @@ export class LyticsClient {
             return Promise.resolve(true);
         }
         return Promise.resolve(false);
+    }
+
+    async getAccountSettings() : Promise<LyticsAccountSetting[]> {
+        const url = `${this.base_url}/api/account/setting`;
+        const settings = await this.doGet(url);
+        return Promise.resolve(settings);
+    }
+    async getAccountSettingsGroupedByCategory(): Promise<Map<string, LyticsAccountSetting[]>> {
+        const settings = await this.getAccountSettings();
+        let map: Map<string, LyticsAccountSetting[]> = new Map();
+        for (let i = 0; i < settings.length; i++) {
+            let setting = settings[i];
+            const category = setting.category!;
+            let values = map.get(category);
+            if (!values) {
+                values = [];
+                map.set(category, values);
+            }
+            values.push(setting);
+        }
+        return Promise.resolve(map);
+    }
+    async getAccountSetting(slug: string) : Promise<LyticsAccountSetting | undefined> {
+        if (this.isNullOrWhitespace(slug)) {
+            throw new Error('Required parameter is missing.');
+        }
+        const url = `${this.base_url}/api/account/setting/${slug}`;
+        return this.doGet(url)
+            .catch(err => {
+                if (err.response.status === 404) {
+                    return Promise.resolve(undefined);
+                }
+                throw err;
+            });
+    }
+    async updateAccountSetting(slug: string, value: any) : Promise<LyticsAccountSetting | undefined> {
+        if (this.isNullOrWhitespace(slug) || value === undefined || value === null) {
+            throw new Error('Required parameter is missing.');
+        }
+        const url = `${this.base_url}/api/account/setting/${slug}`;
+        return this.doPut(url, JSON.stringify(value))
+            .catch(err => {
+                if (err.response.status === 404) {
+                    return Promise.resolve(undefined);
+                }
+                throw err;
+            });
+    }
+    async deleteAccountSetting(slug: string) : Promise<boolean> {
+        if (this.isNullOrWhitespace(slug)) {
+            throw new Error('Required parameter is missing.');
+        }
+        const url = `${this.base_url}/api/account/setting/${slug}`;
+        const subscription = await this.doDelete(url)
+            .catch(err => {
+                if (err.response.status === 404) {
+                    return Promise.resolve(false);
+                }
+                throw err;
+            });
+        return Promise.resolve(true);
     }
 }

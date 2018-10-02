@@ -775,7 +775,7 @@ describe('getAccessTokens', function () {
 });
 
 describe('getAccessToken', function () {
-    it('should return undefined when an access token that does not exist is specified', async function() {
+    it('should return undefined when an access token that does not exist is specified', async function () {
         const lytics = new LyticsClient(apikey);
         const token = await lytics.getAccessToken('xxxxx', aid);
         assert.isUndefined(token);
@@ -806,5 +806,99 @@ describe('getTokenScopes', function () {
         const scopes = await lytics.getTokenScopes();
         assert.isDefined(scopes);
         assert.isTrue(isArray(scopes));
+    });
+});
+
+describe('getAccountSettings', function () {
+    it('should return an array of account settings', async function () {
+        const lytics = new LyticsClient(apikey);
+        const settings = await lytics.getAccountSettings();
+        assert.isDefined(settings);
+        assert.isTrue(isArray(settings));
+    });
+});
+
+describe('getAccountSettingsGroupedByCategory', function () {
+    it('should return a map of account settings', async function () {
+        const lytics = new LyticsClient(apikey);
+        const map = await lytics.getAccountSettingsGroupedByCategory();
+        assert.isDefined(map);
+        for (let key of map.keys()) {
+            const settings = map.get(key);
+            assert.isDefined(settings);
+            for (var i=0; i<settings!.length; i++) {
+                assert.equal(settings![i].category, key);
+            }
+        }
+    });
+});
+
+describe('getAccountSetting', function () {
+    it('should return undefined if an invalid slug is used', async function () {
+        const slug = 'xxxx';
+        const lytics = new LyticsClient(apikey);
+        const setting = await lytics.getAccountSetting(slug);
+        assert.isUndefined(setting);
+    });
+    it('should return an object when a valid slug is used', async function () {
+        const slug = 'api_whitelist_domains';
+        const lytics = new LyticsClient(apikey);
+        const setting = await lytics.getAccountSetting(slug);
+        assert.isDefined(setting);
+        assert.equal(setting!.slug, slug);
+    });
+});
+
+describe('updateAccountSetting', function () {
+    it('should return undefined if the slug of a setting that does not exist is specified', async function () {
+        const slug = 'xxxx';
+        const lytics = new LyticsClient(apikey);
+        const setting = await lytics.updateAccountSetting(slug, 'aaaaa');
+        assert.isUndefined(setting);
+    });
+    it('should throw an error if no value is specified', async function () {
+        const slug = 'api_whitelist_domains';
+        const lytics = new LyticsClient(apikey);
+        try {
+            const setting = await lytics.updateAccountSetting(slug, undefined);
+            assert.isTrue(false, 'An error should have been thrown.');
+        }
+        catch (err) {
+            assert.isTrue(true);
+        }
+        try {
+            const setting = await lytics.updateAccountSetting(slug, null);
+            assert.isTrue(false, 'An error should have been thrown.');
+        }
+        catch (err) {
+            assert.isTrue(true);
+        }
+    });
+    it('should throw an error if an invalid value is specified', async function () {
+        const slug = 'api_whitelist_domains';
+        const lytics = new LyticsClient(apikey);
+        try {
+            const setting = await lytics.updateAccountSetting(slug, false);
+            assert.isTrue(false, 'An error should have been thrown if false is set for an array setting.');
+        }
+        catch (err) {
+            assert.isTrue(true);
+        }
+    });
+    it('should return an object when an existing account setting is updated with a compatible value', async function () {
+        const newValue = ['www.lytics.com', 'new.lytics.com'];
+        const slug = 'api_whitelist_domains';
+        const lytics = new LyticsClient(apikey);
+        const setting = await lytics.updateAccountSetting(slug, newValue);
+        assert.isDefined(setting);
+        assert.equal(setting!.slug, slug);
+        assert.isDefined(setting!.value);
+        assert.isTrue(isArray(setting!.value));
+        assert.equal(setting!.value!.length, newValue.length);
+        for (let i = 0; i < newValue.length; i++) {
+            assert.equal(setting!.value![i], newValue[i]);
+        }
+        const result = await lytics.deleteAccountSetting(slug);
+        assert.isTrue(result);
     });
 });

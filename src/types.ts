@@ -511,3 +511,21 @@ export class LyticsAccessTokenConfig {
     name: string | undefined;
     value: string | undefined;
 }
+export class LyticsAccountSetting {
+    slug: string | undefined;
+    category: string | undefined;
+    value: any;
+    field: LyticsAccountSettingField | undefined;
+    can_be_assigned: boolean = false;
+    subject: string | undefined;
+}
+export class LyticsAccountSettingField {
+    type: string | undefined;
+    label: string | undefined;
+    name: string | undefined;
+    sort_order: number = 0;
+    optional: boolean = false;
+    editable: boolean = false;
+    user_config_disabled: boolean = false;
+    description: string | undefined;
+}
