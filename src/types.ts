@@ -529,3 +529,26 @@ export class LyticsAccountSettingField {
     user_config_disabled: boolean = false;
     description: string | undefined;
 }
+export class DocumentTopicsResult {
+    total: number = 0;
+    urls: DocumentTopics[] = [];
+}
+export class DocumentTopics {
+    url: string | undefined;
+    https: boolean = false;
+    title: string | undefined;
+    description: string | undefined;
+    topics: string[] = [];
+    topic_relevances: any | undefined;
+    primary_image: string | undefined;
+    author: string | undefined;
+    created: Date | undefined;
+    id: string | undefined;
+    sitename: string | undefined;
+    stream: string | undefined;
+    aspects: string[] = [];
+    language: string | undefined;
+    updated: Date | undefined;
+    fetched: Date | undefined;
+    meta: string[] = [];
+}

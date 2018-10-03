@@ -902,3 +902,34 @@ describe('updateAccountSetting', function () {
         assert.isTrue(result);
     });
 });
+
+describe('getDocumentTopics', function () {
+    it('should throw an error if an empty url is provided', async function () {
+        const lytics = new LyticsClient(apikey);
+        try {
+            await lytics.getDocumentTopics('  ');
+            assert.isTrue(false);
+        }
+        catch(err) {
+            assert.isTrue(true);
+        }
+    });
+    it('should return undefined if a url that has not been crawled is provided', async function () {
+        const lytics = new LyticsClient(apikey);
+        const topics = await lytics.getDocumentTopics('xxxxxxx');
+        assert.isUndefined(topics);
+    });
+    it('should return topic if a url that has been crawled is provided', async function () {
+        const url = 'adamconn.lyticsdemo.com/no-cook-yogurt-cups.html';
+        const lytics = new LyticsClient(apikey);
+        const topics = await lytics.getDocumentTopics(url);
+        assert.isDefined(topics);
+        assert.equal(topics!.url, url);
+        const topics2 = await lytics.getDocumentTopics(`https://${url}`);
+        assert.isDefined(topics2);
+        assert.equal(topics2!.url, url);
+    });
+});
+
+
+

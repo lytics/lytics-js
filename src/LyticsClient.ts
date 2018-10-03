@@ -1,8 +1,8 @@
 'use strict';
 import axios, { AxiosRequestConfig, } from 'axios';
 import qs = require('query-string');
-import { LyticsAccount, DataStream, DataStreamField, TableSchema, TableSchemaField, TableSchemaFieldInfo, Query, CollectResultInfo, SegmentCollection, Segment, Campaign, CampaignVariation, ContentClassification, CampaignVariationDetailOverride, Topic, TopicUrlCollection, Subscription, WebhookConfig, CreateAccessTokenConfig, LyticsAccessToken, TokenScope, LyticsAccountSetting } from './types';
-import { isArray } from 'util';
+import { LyticsAccount, DataStream, DataStreamField, TableSchema, TableSchemaField, TableSchemaFieldInfo, Query, CollectResultInfo, SegmentCollection, Segment, Campaign, CampaignVariation, ContentClassification, CampaignVariationDetailOverride, Topic, TopicUrlCollection, Subscription, WebhookConfig, CreateAccessTokenConfig, LyticsAccessToken, TokenScope, LyticsAccountSetting, DocumentTopics, DocumentTopicsResult } from './types';
+import { isArray, isUndefined } from 'util';
 import { URL } from 'url';
 
 export class LyticsClientOptions {
@@ -699,5 +699,25 @@ export class LyticsClient {
                 throw err;
             });
         return Promise.resolve(true);
+    }
+    async getDocumentTopics(docUrl: string): Promise<DocumentTopics | undefined> {
+        if (this.isNullOrWhitespace(docUrl)) {
+            throw new Error('Required parameter is missing.');
+        }
+        //
+        //remove protocol from url
+        docUrl = docUrl.replace(/(^\w+:|^)\/\//, '');
+        const url = `${this.base_url}/api/content/doc?urls=${docUrl}`;
+        const result = await this.doGet(url)
+            .catch(err => {
+                if (err.response.status === 404) {
+                    return Promise.resolve(undefined);
+                }
+                throw err;
+            }) as DocumentTopicsResult;
+        if (isUndefined(result) || result.total === 0) {
+            return Promise.resolve(undefined);
+        }
+        return Promise.resolve(result.urls[0]);
     }
 }
