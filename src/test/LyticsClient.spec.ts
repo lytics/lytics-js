@@ -931,5 +931,45 @@ describe('getDocumentTopics', function () {
     });
 });
 
+describe('getSegmentMLModels', function () {
+    it('should return an array of models', async function () {
+        const lytics = new LyticsClient(apikey);
+        const models = await lytics.getSegmentMLModels();
+        assert.isDefined(models);
+        assert.isTrue(isArray(models));
+    });
+});
+
+describe('getSegmentMLModel', function () {
+    it('should return undefined if an invalid id is used', async function () {
+        const id = 'xxxx';
+        const lytics = new LyticsClient(apikey);
+        const model = await lytics.getSegmentMLModel(id);
+        assert.isUndefined(model);
+    });
+    it('should return a model when a valid id is used', async function () {
+        const id = 'all::smt_active';
+        const lytics = new LyticsClient(apikey);
+        const model = await lytics.getSegmentMLModel(id);
+        assert.isDefined(model);
+        assert.isDefined(model!.conf);
+        assert.isDefined(model!.conf!.source);
+        assert.isDefined(model!.conf!.source!.slug_name);
+        assert.isDefined(model!.conf!.target);
+        assert.isDefined(model!.conf!.target!.slug_name);
+        assert.equal(`${model!.conf!.source!.slug_name}::${model!.conf!.target!.slug_name}`, id);
+    });
+});
+
+describe('createSegmentMLModel', function () {
+    it('should return a model when valid parameters are used', async function () {
+        // const lytics = new LyticsClient(apikey);
+        // const model = await lytics.createSegmentMLModel()
+        // assert.isUndefined(model);
+    });
+    it('should return a model when valid parameters are used', async function () {
+    });
+});
+
 
 
