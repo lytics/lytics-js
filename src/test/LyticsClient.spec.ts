@@ -510,6 +510,11 @@ describe('testFunction', function () {
         var result = await lytics.testFunction('toint', ['100']);
         assert.equal(result, 100);
     });
+    it('The qs function returns a string.', async function () {
+        const lytics = new LyticsClient(apikey);
+        var result = await lytics.testFunction('qs', ['https://www.lytics.com/test?name=First+Last', 'name']);
+        assert.equal(result, 'First Last');
+    });
 });
 
 describe('setWhitelistFieldStatus', function () {
