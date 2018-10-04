@@ -123,6 +123,8 @@ async function startWatch(dirs: string[], maxrecords: number, apikey: string) {
             atomic: default_file_event_delay
         }).on('change', async (filePath:string, stats:any) => {
             try {
+                console.log('\n');
+                logger.info(`File changed: ${filePath}`);
                 const p = path.parse(filePath);
                 const pathLql = getFileName(p, ['lql']);
                 if (!pathLql) {
@@ -154,7 +156,7 @@ async function startWatch(dirs: string[], maxrecords: number, apikey: string) {
                 }
             }
             catch (err) {
-                logger.error(`Error: ${err}`);
+                logger.error(`${err}`);
             }
         });
         logger.info(`Watching folder: ${folderPath}`);
