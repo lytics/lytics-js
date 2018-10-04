@@ -121,7 +121,7 @@ async function startWatch(dirs: string[], maxrecords: number, apikey: string) {
         const folderPath = path.resolve(dirs[i]);
         chokidar.watch(folderPath, {
             atomic: default_file_event_delay
-        }).on('change', async (filePath, stats) => {
+        }).on('change', async (filePath:string, stats:any) => {
             try {
                 const p = path.parse(filePath);
                 const pathLql = getFileName(p, ['lql']);
@@ -146,7 +146,12 @@ async function startWatch(dirs: string[], maxrecords: number, apikey: string) {
                         logger.error(`${label} failed: ${err}`);
                     }
                 }
-                logger.info(`Done handling records: ${records.length}`);
+                if (records.length === 0) {
+                    logger.error(`File has no records or is not well-formed: ${pathData}`);
+                }
+                else {
+                    logger.info(`Done handling records: ${records.length}`);
+                }
             }
             catch (err) {
                 logger.error(`Error: ${err}`);
