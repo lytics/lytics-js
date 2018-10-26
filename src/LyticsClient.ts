@@ -1,7 +1,7 @@
 'use strict';
 import axios, { AxiosRequestConfig, } from 'axios';
 import qs = require('query-string');
-import { LyticsAccount, DataStream, DataStreamField, TableSchema, TableSchemaField, TableSchemaFieldInfo, Query, CollectResultInfo, SegmentCollection, Segment, Campaign, CampaignVariation, ContentClassification, CampaignVariationDetailOverride, Topic, TopicUrlCollection, Subscription, WebhookConfig, CreateAccessTokenConfig, LyticsAccessToken, TokenScope, LyticsAccountSetting, DocumentTopics, DocumentTopicsResult } from './types';
+import { LyticsAccount, DataStream, DataStreamField, TableSchema, TableSchemaField, TableSchemaFieldInfo, Query, CollectResultInfo, SegmentCollection, Segment, Campaign, CampaignVariation, ContentClassification, CampaignVariationDetailOverride, Topic, TopicUrlCollection, Subscription, WebhookConfig, CreateAccessTokenConfig, LyticsAccessToken, TokenScope, LyticsAccountSetting, DocumentTopics, DocumentTopicsResult, DataUploadResponse, DataUploadConfig } from './types';
 import { isArray, isUndefined } from 'util';
 import { URL } from 'url';
 
@@ -719,5 +719,12 @@ export class LyticsClient {
             return Promise.resolve(undefined);
         }
         return Promise.resolve(result.urls[0]);
+    }
+    async uploadData(config:DataUploadConfig, data: any): Promise<DataUploadResponse> {
+        if (!config || this.isNullOrWhitespace(config.stream) || data === undefined || data === null) {
+            throw new Error('Required parameter is missing');
+        }
+        const url = `${this.base_url}/collect/json/${config.stream}?timestamp_field=${config.timestamp_field}&dryrun=${config.dryrun}`;
+        return this.doPost(url, data);
     }
 }

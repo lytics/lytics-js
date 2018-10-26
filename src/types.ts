@@ -552,3 +552,13 @@ export class DocumentTopics {
     fetched: Date | undefined;
     meta: string[] = [];
 }
+export class DataUploadConfig {
+    constructor(readonly stream:string) {
+    }
+    timestamp_field: string | undefined;
+    dryrun: boolean = false;
+}
+export class DataUploadResponse {
+    message_count: number = 0;
+    rejected_count: number = 0;
+}

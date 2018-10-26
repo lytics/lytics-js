@@ -1,6 +1,6 @@
 import { LyticsClient, LyticsClientOptions } from '../LyticsClient';
 import { assert } from 'chai';
-import { TableSchemaFieldInfo, CollectResultInfo, WebhookConfig, CreateAccessTokenConfig, LyticsAccessTokenReader, LyticsAccessTokenConfig } from '../types';
+import { TableSchemaFieldInfo, CollectResultInfo, WebhookConfig, CreateAccessTokenConfig, LyticsAccessTokenReader, LyticsAccessTokenConfig, DataUploadConfig } from '../types';
 import { URL } from 'url';
 import { isArray } from 'util';
 const settings = require('./settings');
@@ -936,5 +936,38 @@ describe('getDocumentTopics', function () {
     });
 });
 
-
-
+describe('uploadData', function () {
+    it('should throw an error if parameters are missing', async function () {
+        const lytics = new LyticsClient(apikey);
+        try {
+            await lytics.uploadData(new DataUploadConfig('xxxxx'), undefined);
+            assert.isTrue(false);
+        }
+        catch(err) {
+            assert.isTrue(true);
+        }
+    });
+    it('should return that one message was handled', async function () {
+        const lytics = new LyticsClient(apikey);
+        const config = new DataUploadConfig('xxxxx');
+        config.dryrun = true;
+        const data = { name: "Test User 1" };
+        const result = await lytics.uploadData(config, data);
+        assert.isDefined(result);
+        assert.equal(result.message_count, 1);
+        assert.equal(result.rejected_count, 0);
+    });
+    it('should return that multiple message were handled', async function () {
+        const lytics = new LyticsClient(apikey);
+        const config = new DataUploadConfig('xxxxx');
+        config.dryrun = true;
+        const data = [
+            { name: "Test User 1" },
+            { name: "Test User 2" }
+        ];
+        const result = await lytics.uploadData(config, data);
+        assert.isDefined(result);
+        assert.equal(result.message_count, data.length);
+        assert.equal(result.rejected_count, 0);
+    });
+});
