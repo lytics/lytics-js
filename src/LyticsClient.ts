@@ -177,7 +177,7 @@ export class LyticsClient {
         if (this.isNullOrWhitespace(tableName) || this.isNullOrWhitespace(fieldName) || !fieldValue) {
             throw new Error('Required parameter is missing.');
         }
-        const url = `${this.base_url}/api/entity/${tableName}/${fieldName}/${fieldValue}?wait=${wait}`;
+        const url = `${this.base_url}/api/entity/${tableName}/${fieldName}/${encodeURIComponent(fieldValue)}?wait=${wait}`;
         const data = await this.doGet(url)
             .catch(err => {
                 if (err.response.status == 500) {

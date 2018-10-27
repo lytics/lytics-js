@@ -173,6 +173,13 @@ describe('getEntity', function () {
         assert.isDefined(entity);
         assert.equal(entity!._uid, '114940.99527438209');
     });
+    //
+    it('should return an object when a value that must be url-encoded is used', async function () {
+        const lytics = new LyticsClient(apikey);
+        var entity = await lytics.getEntity('user', 'email', 'adam.conn+test10@gmail.com', false);
+        assert.isDefined(entity);
+        assert.equal(entity!.email, 'adam.conn+test10@gmail.com');
+    });
 });
 
 describe('getQueries', function () {
