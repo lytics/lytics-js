@@ -978,3 +978,40 @@ describe('uploadData', function () {
         assert.equal(result.rejected_count, 0);
     });
 });
+
+describe('getFragments', function () {
+    it('should throw an error if parameters are missing', async function () {
+        const lytics = new LyticsClient(apikey);
+        try {
+            await lytics.getFragments('', 'xxxxx');
+            assert.isTrue(false);
+        }
+        catch(err) {
+            assert.isTrue(true);
+        }
+        try {
+            await lytics.getFragments('xxxxx', '');
+            assert.isTrue(false);
+        }
+        catch(err) {
+            assert.isTrue(true);
+        }
+    });
+    it('should return undefined if no matching fragments are found', async function () {
+        const lytics = new LyticsClient(apikey);
+        const fragments = await lytics.getFragments('xxxxx', 'xxxxx');
+        assert.isUndefined(fragments);
+    });
+    it('should return collection if matching fragments are found', async function () {
+        const lytics = new LyticsClient(apikey);
+        const fragments = await lytics.getFragments('email', 'adam.conn@gmail.com');
+        assert.isDefined(fragments);
+        const entity = fragments!.entity;
+        assert.isDefined(entity);
+        assert.equal(entity['email'], 'adam.conn@gmail.com');
+        const keys = fragments!.keys;
+        const key = keys.find(key => key.key === 'email');
+        assert.isDefined(key);
+        assert.equal(key!.value, 'adam.conn@gmail.com');
+    });
+});

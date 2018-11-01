@@ -562,3 +562,22 @@ export class DataUploadResponse {
     message_count: number = 0;
     rejected_count: number = 0;
 }
+export class FragmentKey {
+    key: string | undefined;
+    value: string | undefined;
+}
+export class FragmentMetadata {
+    streams: string[] = [];
+    conflict: boolean = false;
+}
+export class Fragment {
+    key: FragmentKey[] = [];
+    neighbors: FragmentKey[] = [];
+    fragment: any;
+    meta: FragmentMetadata | undefined;
+}
+export class FragmentCollection {
+    entity: any;
+    keys: FragmentKey[] = [];
+    fragments: Fragment[] = [];
+}

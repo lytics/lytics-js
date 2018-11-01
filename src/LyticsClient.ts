@@ -1,7 +1,7 @@
 'use strict';
 import axios, { AxiosRequestConfig, } from 'axios';
 import qs = require('query-string');
-import { LyticsAccount, DataStream, DataStreamField, TableSchema, TableSchemaField, TableSchemaFieldInfo, Query, CollectResultInfo, SegmentCollection, Segment, Campaign, CampaignVariation, ContentClassification, CampaignVariationDetailOverride, Topic, TopicUrlCollection, Subscription, WebhookConfig, CreateAccessTokenConfig, LyticsAccessToken, TokenScope, LyticsAccountSetting, DocumentTopics, DocumentTopicsResult, DataUploadResponse, DataUploadConfig } from './types';
+import { LyticsAccount, DataStream, DataStreamField, TableSchema, TableSchemaField, TableSchemaFieldInfo, Query, CollectResultInfo, SegmentCollection, Segment, Campaign, CampaignVariation, ContentClassification, CampaignVariationDetailOverride, Topic, TopicUrlCollection, Subscription, WebhookConfig, CreateAccessTokenConfig, LyticsAccessToken, TokenScope, LyticsAccountSetting, DocumentTopics, DocumentTopicsResult, DataUploadResponse, DataUploadConfig, FragmentKey, FragmentCollection } from './types';
 import { isArray, isUndefined } from 'util';
 import { URL } from 'url';
 
@@ -726,5 +726,16 @@ export class LyticsClient {
         }
         const url = `${this.base_url}/collect/json/${config.stream}?timestamp_field=${config.timestamp_field}&dryrun=${config.dryrun}`;
         return this.doPost(url, data);
+    }
+    async getFragments(key: string, value: any) : Promise<FragmentCollection | undefined> {
+        if (this.isNullOrWhitespace(key) || this.isNullOrWhitespace(value)) {
+            throw new Error('Required parameter is missing.');
+        }
+        const url = `${this.base_url}/api/entity/user/${key}/${value}?explain=true`;
+        let fragments = await this.doGet(url);
+        if (!fragments) {
+            fragments = undefined;
+        }
+        return Promise.resolve(fragments);
     }
 }
