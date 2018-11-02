@@ -432,7 +432,7 @@ export class SubscriptionConfig {
     name: string | undefined;
     segment_ids: string[] = [];
     subscription_id: string | undefined;
-    user_fields: string[] = []; 
+    user_fields: string[] = [];
     webhook_url: URL | undefined;
     version: string | undefined;
 }
@@ -459,9 +459,9 @@ export class WebhookConfig {
     }
 }
 export class TokenScope {
-    constructor(readonly scope:string, readonly description:string) {
+    constructor(readonly scope: string, readonly description: string) {
     }
-    static readonly supportedScopes:TokenScope[] = [
+    static readonly supportedScopes: TokenScope[] = [
         new TokenScope('admin', 'can manage the account (create users, grant roles) as well as all other roles'),
         new TokenScope('data', ''),
         new TokenScope('data_write', ''),
@@ -553,7 +553,7 @@ export class DocumentTopics {
     meta: string[] = [];
 }
 export class DataUploadConfig {
-    constructor(readonly stream:string) {
+    constructor(readonly stream: string) {
     }
     timestamp_field: string | undefined;
     dryrun: boolean = false;
@@ -580,4 +580,74 @@ export class FragmentCollection {
     entity: any;
     keys: FragmentKey[] = [];
     fragments: Fragment[] = [];
+}
+export class DOT {
+    private static _crypto = require('crypto');
+    private static hashValue(value: any): string {
+        value = JSON.stringify(value);
+        const hash = DOT._crypto.createHash('md5');
+        return hash.update(value).digest('hex');
+    }
+    static stringify(collection: FragmentCollection): string | undefined {
+        if (!collection) {
+            return undefined;
+        }
+        //
+        //
+        let position = 0;
+        const fragmentPositions = new Map<Fragment, Number>();
+        const keyForFragments = new Map<string, Fragment[]>();
+        collection.fragments.forEach(fragment => {
+            position++;
+            fragmentPositions.set(fragment, position);
+            //
+            const keys: string[] = [];
+            fragment.key.forEach(key => {
+                keys.push(this.hashValue(key));
+            })
+            const hashedKey = this.hashValue(fragment.key);
+            if (keys.indexOf(hashedKey) === -1) {
+                keys.push(hashedKey);
+            }
+            keys.forEach(key => {
+                let fragments = keyForFragments.get(key);
+                if (!fragments) {
+                    fragments = [];
+                }
+                if (fragments!.indexOf(fragment) === -1) {
+                    fragments!.push(fragment);
+                }
+                keyForFragments.set(key, fragments!);
+            })
+        });
+        //
+        //
+        const dotNodes: string[] = [];
+        const dotEdges: string[] = [];
+        fragmentPositions.forEach((position, fragment) => {
+            const ids: string[] = [];
+            fragment.key.forEach(key => {
+                ids.push(`${key.key}: ${key.value}`);
+            });
+            dotNodes.push(`${position} [label="${ids.join('\n')}"]`);
+            //
+            //
+            fragment.neighbors.forEach(neighbor => {
+                const hashedNeighborKey = this.hashValue(neighbor);
+                const neighborFragments = keyForFragments.get(hashedNeighborKey);
+                if (neighborFragments) {
+                    const edges:string[] = [];
+                    neighborFragments!.forEach(f => {
+                        const neighborPosition = fragmentPositions.get(f);
+                        if (position !== neighborPosition) {
+                            edges.push(`${position} -- ${neighborPosition}`);
+                        }
+                    });
+                    dotEdges.push(edges.join(';'));
+                }
+            })
+        });
+        const str = `dinetwork {${dotNodes.join(';')};${dotEdges.join(';')}}`;
+        return str;
+    }
 }
