@@ -983,14 +983,21 @@ describe('getFragments', function () {
     it('should throw an error if parameters are missing', async function () {
         const lytics = new LyticsClient(apikey);
         try {
-            await lytics.getFragments('', 'xxxxx');
+            await lytics.getFragments('', 'bbb', 'ccc');
             assert.isTrue(false);
         }
         catch(err) {
             assert.isTrue(true);
         }
         try {
-            await lytics.getFragments('xxxxx', '');
+            await lytics.getFragments('aaa', '', 'ccc');
+            assert.isTrue(false);
+        }
+        catch(err) {
+            assert.isTrue(true);
+        }
+        try {
+            await lytics.getFragments('aaa', 'bbb', '');
             assert.isTrue(false);
         }
         catch(err) {
@@ -999,12 +1006,12 @@ describe('getFragments', function () {
     });
     it('should return undefined if no matching fragments are found', async function () {
         const lytics = new LyticsClient(apikey);
-        const fragments = await lytics.getFragments('xxxxx', 'xxxxx');
+        const fragments = await lytics.getFragments('user', 'xxxxx', 'xxxxx');
         assert.isUndefined(fragments);
     });
     it('should return collection if matching fragments are found', async function () {
         const lytics = new LyticsClient(apikey);
-        const fragments = await lytics.getFragments('email', 'adam.conn@gmail.com');
+        const fragments = await lytics.getFragments('user', 'email', 'adam.conn@gmail.com');
         assert.isDefined(fragments);
         const entity = fragments!.entity;
         assert.isDefined(entity);

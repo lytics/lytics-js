@@ -727,11 +727,11 @@ export class LyticsClient {
         const url = `${this.base_url}/collect/json/${config.stream}?timestamp_field=${config.timestamp_field}&dryrun=${config.dryrun}`;
         return this.doPost(url, data);
     }
-    async getFragments(key: string, value: any) : Promise<FragmentCollection | undefined> {
-        if (this.isNullOrWhitespace(key) || this.isNullOrWhitespace(value)) {
+    async getFragments(table: string, key: string, value: any) : Promise<FragmentCollection | undefined> {
+        if (this.isNullOrWhitespace(table) || this.isNullOrWhitespace(key) || this.isNullOrWhitespace(value)) {
             throw new Error('Required parameter is missing.');
         }
-        const url = `${this.base_url}/api/entity/user/${key}/${value}?explain=true`;
+        const url = `${this.base_url}/api/entity/${table}/${key}/${value}?explain=true`;
         let fragments = await this.doGet(url);
         if (!fragments) {
             fragments = undefined;

@@ -1,4 +1,5 @@
 import { URL } from 'url';
+import { isNullOrUndefined } from 'util';
 
 export class LyticsAccount {
     aid: number = 0;
@@ -589,7 +590,7 @@ export class DOT {
         return hash.update(value).digest('hex');
     }
     static stringify(collection: FragmentCollection): string | undefined {
-        if (!collection) {
+        if (isNullOrUndefined(collection)) {
             return undefined;
         }
         //
