@@ -1009,16 +1009,34 @@ describe('getFragments', function () {
         const fragments = await lytics.getFragments('user', 'xxxxx', 'xxxxx');
         assert.isUndefined(fragments);
     });
-    it('should return collection if matching fragments are found', async function () {
+    it('should return collection of user fragments if matching fragments are found', async function () {
+        const table = 'user';
+        const field = 'email';
+        const value = 'adam.conn@gmail.com';
         const lytics = new LyticsClient(apikey);
-        const fragments = await lytics.getFragments('user', 'email', 'adam.conn@gmail.com');
+        const fragments = await lytics.getFragments(table, field, value);
         assert.isDefined(fragments);
         const entity = fragments!.entity;
         assert.isDefined(entity);
-        assert.equal(entity['email'], 'adam.conn@gmail.com');
+        assert.equal(entity[field], value);
         const keys = fragments!.keys;
-        const key = keys.find(key => key.key === 'email');
+        const key = keys.find(key => key.key === field);
         assert.isDefined(key);
-        assert.equal(key!.value, 'adam.conn@gmail.com');
+        assert.equal(key!.value, value);
+    });
+    it('should return collection of content fragments if matching fragments are found', async function () {
+        const table = 'content';
+        const field = 'hashedurl';
+        const value = '8197029859537599926';
+        const lytics = new LyticsClient(apikey);
+        const fragments = await lytics.getFragments(table, field, value);
+        assert.isDefined(fragments);
+        const entity = fragments!.entity;
+        assert.isDefined(entity);
+        assert.equal(entity[field], value);
+        const keys = fragments!.keys;
+        const key = keys.find(key => key.key === field);
+        assert.isDefined(key);
+        assert.equal(key!.value, value);
     });
 });

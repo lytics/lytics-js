@@ -589,8 +589,9 @@ export class DOT {
         const hash = DOT._crypto.createHash('md5');
         return hash.update(value).digest('hex');
     }
-    static stringify(collection: FragmentCollection): string | undefined {
-        if (isNullOrUndefined(collection)) {
+    //static stringify(collection: FragmentCollection): string | undefined {
+    static fragmentsToDot(fragments: Fragment[]): string | undefined {
+        if (isNullOrUndefined(fragments)) {
             return undefined;
         }
         //
@@ -598,8 +599,9 @@ export class DOT {
         let position = 0;
         const fragmentPositions = new Map<Fragment, Number>();
         const keyForFragments = new Map<string, Fragment[]>();
-        collection.fragments.forEach(fragment => {
-            position++;
+        for(let i=0; i<fragments.length; i++) {
+            const fragment = fragments[i];
+            const position = i;
             fragmentPositions.set(fragment, position);
             //
             const keys: string[] = [];
@@ -620,7 +622,7 @@ export class DOT {
                 }
                 keyForFragments.set(key, fragments!);
             })
-        });
+        };
         //
         //
         const dotNodes: string[] = [];
@@ -630,23 +632,26 @@ export class DOT {
             fragment.key.forEach(key => {
                 ids.push(`${key.key}: ${key.value}`);
             });
-            dotNodes.push(`${position} [label="${ids.join('\n')}"]`);
+            //dotNodes.push(`${position} [label="${ids.join('\n')}"]`);
+            dotNodes.push(`${position}`);
             //
             //
-            fragment.neighbors.forEach(neighbor => {
-                const hashedNeighborKey = this.hashValue(neighbor);
-                const neighborFragments = keyForFragments.get(hashedNeighborKey);
-                if (neighborFragments) {
-                    const edges:string[] = [];
-                    neighborFragments!.forEach(f => {
-                        const neighborPosition = fragmentPositions.get(f);
-                        if (position !== neighborPosition) {
-                            edges.push(`${position} -- ${neighborPosition}`);
-                        }
-                    });
-                    dotEdges.push(edges.join(';'));
-                }
-            })
+            if (fragment.neighbors) {
+                fragment.neighbors.forEach(neighbor => {
+                    const hashedNeighborKey = this.hashValue(neighbor);
+                    const neighborFragments = keyForFragments.get(hashedNeighborKey);
+                    if (neighborFragments) {
+                        const edges:string[] = [];
+                        neighborFragments!.forEach(f => {
+                            const neighborPosition = fragmentPositions.get(f);
+                            if (position !== neighborPosition) {
+                                edges.push(`${position} -- ${neighborPosition}`);
+                            }
+                        });
+                        dotEdges.push(edges.join(';'));
+                    }
+                })    
+            }
         });
         const str = `dinetwork {${dotNodes.join(';')};${dotEdges.join(';')}}`;
         return str;
