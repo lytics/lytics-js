@@ -1,6 +1,6 @@
 {
   "name": "lytics-js",
-  "version": "0.0.44",
+  "version": "0.0.45",
   "description": "Work with the Lytics REST API using JavaScript",
   "main": "./dist/lytics.js",
   "files": [

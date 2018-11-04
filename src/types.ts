@@ -598,7 +598,7 @@ export class DOT {
         let position = 0;
         const fragmentPositions = new Map<Fragment, Number>();
         const keyForFragments = new Map<string, Fragment[]>();
-        for(let i=0; i<fragments.length; i++) {
+        for (let i = 0; i < fragments.length; i++) {
             const fragment = fragments[i];
             const position = i;
             fragmentPositions.set(fragment, position);
@@ -627,29 +627,26 @@ export class DOT {
         const dotNodes: string[] = [];
         const dotEdges: string[] = [];
         fragmentPositions.forEach((position, fragment) => {
-            const ids: string[] = [];
-            fragment.key.forEach(key => {
-                ids.push(`${key.key}: ${key.value}`);
-            });
-            //dotNodes.push(`${position} [label="${ids.join('\n')}"]`);
             dotNodes.push(`${position}`);
-            //
-            //
             if (fragment.neighbors) {
-                fragment.neighbors.forEach(neighbor => {
+                for(let n=0; n<fragment.neighbors.length; n++) {
+                    const neighbor = fragment.neighbors[n];
                     const hashedNeighborKey = this.hashValue(neighbor);
                     const neighborFragments = keyForFragments.get(hashedNeighborKey);
                     if (neighborFragments) {
-                        const edges:string[] = [];
-                        neighborFragments!.forEach(f => {
-                            const neighborPosition = fragmentPositions.get(f);
-                            if (position !== neighborPosition) {
-                                edges.push(`${position} -- ${neighborPosition}`);
+                        for(let f=0; f<neighborFragments.length; f++) {
+                            const fragment = neighborFragments[f];
+                            const neighborPosition = fragmentPositions.get(fragment);
+                            if (position != neighborPosition) {
+                                const opt1 = `${position} -- ${neighborPosition}`;
+                                const opt2 = `${neighborPosition} -- ${position}`;
+                                if (dotEdges.indexOf(opt1) == -1 && dotEdges.indexOf(opt2) == -1) {
+                                    dotEdges.push(opt1);
+                                }
                             }
-                        });
-                        dotEdges.push(edges.join(';'));
+                        }
                     }
-                })    
+                }
             }
         });
         const str = `dinetwork {${dotNodes.join(';')};${dotEdges.join(';')}}`;
