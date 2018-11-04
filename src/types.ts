@@ -589,7 +589,6 @@ export class DOT {
         const hash = DOT._crypto.createHash('md5');
         return hash.update(value).digest('hex');
     }
-    //static stringify(collection: FragmentCollection): string | undefined {
     static fragmentsToDot(fragments: Fragment[]): string | undefined {
         if (isNullOrUndefined(fragments)) {
             return undefined;
