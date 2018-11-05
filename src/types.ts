@@ -563,6 +563,7 @@ export class DataUploadResponse {
     message_count: number = 0;
     rejected_count: number = 0;
 }
+
 export class FragmentKey {
     key: string | undefined;
     value: string | undefined;
@@ -570,6 +571,28 @@ export class FragmentKey {
 export class FragmentMetadata {
     streams: string[] = [];
     conflict: boolean = false;
+}
+export class FragmentHashManager {
+    static readonly _crypto = require('crypto');
+    static hashValue(value: any): string {
+        value = JSON.stringify(value);
+        const hash = FragmentHashManager._crypto.createHash('md5');
+        return hash.update(value).digest('hex');
+    }
+    static getHashForKey(key: FragmentKey | FragmentKey[]):string {
+        let value:any = key;
+        if (Array.isArray(key)) {
+            const compare = function (a: FragmentKey, b: FragmentKey) {
+                if (a.key! < b.key!)
+                    return -1;
+                if (a.key! > b.key!)
+                    return 1;
+                return 0;
+            }
+            value = key.slice().sort(compare);
+        }
+        return FragmentHashManager.hashValue(value);    
+    }
 }
 export class Fragment {
     key: FragmentKey[] = [];
@@ -583,12 +606,12 @@ export class FragmentCollection {
     fragments: Fragment[] = [];
 }
 export class DOT {
-    private static _crypto = require('crypto');
-    private static hashValue(value: any): string {
-        value = JSON.stringify(value);
-        const hash = DOT._crypto.createHash('md5');
-        return hash.update(value).digest('hex');
-    }
+    // private static _crypto = require('crypto');
+    // private static hashValue(value: any): string {
+    //     value = JSON.stringify(value);
+    //     const hash = DOT._crypto.createHash('md5');
+    //     return hash.update(value).digest('hex');
+    // }
     static fragmentsToDot(fragments: Fragment[]): string | undefined {
         if (isNullOrUndefined(fragments)) {
             return undefined;
@@ -605,9 +628,9 @@ export class DOT {
             //
             const keys: string[] = [];
             fragment.key.forEach(key => {
-                keys.push(this.hashValue(key));
+                keys.push(FragmentHashManager.getHashForKey(key));
             })
-            const hashedKey = this.hashValue(fragment.key);
+            const hashedKey = FragmentHashManager.getHashForKey(fragment.key);
             if (keys.indexOf(hashedKey) === -1) {
                 keys.push(hashedKey);
             }
@@ -629,12 +652,12 @@ export class DOT {
         fragmentPositions.forEach((position, fragment) => {
             dotNodes.push(`${position}`);
             if (fragment.neighbors) {
-                for(let n=0; n<fragment.neighbors.length; n++) {
+                for (let n = 0; n < fragment.neighbors.length; n++) {
                     const neighbor = fragment.neighbors[n];
-                    const hashedNeighborKey = this.hashValue(neighbor);
+                    const hashedNeighborKey = FragmentHashManager.getHashForKey(neighbor);
                     const neighborFragments = keyForFragments.get(hashedNeighborKey);
                     if (neighborFragments) {
-                        for(let f=0; f<neighborFragments.length; f++) {
+                        for (let f = 0; f < neighborFragments.length; f++) {
                             const fragment = neighborFragments[f];
                             const neighborPosition = fragmentPositions.get(fragment);
                             if (position != neighborPosition) {

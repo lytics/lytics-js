@@ -1,6 +1,6 @@
 import { LyticsClient, LyticsClientOptions } from '../LyticsClient';
 import { assert } from 'chai';
-import { TableSchemaFieldInfo, CollectResultInfo, WebhookConfig, CreateAccessTokenConfig, LyticsAccessTokenReader, LyticsAccessTokenConfig, DataUploadConfig } from '../types';
+import { TableSchemaFieldInfo, CollectResultInfo, WebhookConfig, CreateAccessTokenConfig, LyticsAccessTokenReader, LyticsAccessTokenConfig, DataUploadConfig, Fragment, FragmentCollection, FragmentKey, FragmentHashManager } from '../types';
 import { URL } from 'url';
 import { isArray } from 'util';
 const settings = require('./settings');
@@ -1038,5 +1038,24 @@ describe('getFragments', function () {
         const key = keys.find(key => key.key === field);
         assert.isDefined(key);
         assert.equal(key!.value, value);
+    });
+});
+describe('FragmentHashManager', function () {
+    it('Hashes should match for 2 fragments with the same keys.', async function () {
+        const keyA = new FragmentKey();
+        keyA.key = 'aaa';
+        keyA.value = '111';
+        const keyB = new FragmentKey();
+        keyB.key = 'bbb';
+        keyB.value = '222';
+        const fragment1 = new Fragment();
+        fragment1.key.push(keyA);
+        fragment1.key.push(keyB);
+        const fragment2 = new Fragment();
+        fragment2.key.push(keyB);
+        fragment2.key.push(keyA);
+        const hash1 = FragmentHashManager.getHashForKey(fragment1.key);
+        const hash2 = FragmentHashManager.getHashForKey(fragment2.key);
+        assert.equal(hash1, hash2);
     });
 });
