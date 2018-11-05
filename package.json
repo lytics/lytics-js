@@ -1,6 +1,6 @@
 {
   "name": "lytics-js",
-  "version": "0.0.47",
+  "version": "0.0.48",
   "description": "Work with the Lytics REST API using JavaScript",
   "main": "./dist/lytics.js",
   "files": [
@@ -13,10 +13,12 @@
     "axios": "^0.18.0",
     "chokidar": "^2.0.4",
     "commander": "^2.19.0",
+    "int64": "0.0.5",
     "jsome": "^2.5.0",
     "line-by-line": "^0.1.6",
     "neat-csv": "^3.0.0",
     "query-string": "^6.2.0",
+    "siphash": "^1.0.3",
     "winston": "^3.1.0"
   },
   "devDependencies": {
