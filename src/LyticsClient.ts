@@ -1,8 +1,8 @@
 'use strict';
 import axios, { AxiosRequestConfig, } from 'axios';
 import qs = require('query-string');
-import { LyticsAccount, DataStream, DataStreamField, TableSchema, TableSchemaField, TableSchemaFieldInfo, Query, CollectResultInfo, SegmentCollection, Segment, Campaign, CampaignVariation, ContentClassification, CampaignVariationDetailOverride, Topic, TopicUrlCollection, Subscription, WebhookConfig, CreateAccessTokenConfig, LyticsAccessToken, TokenScope, LyticsAccountSetting, DocumentTopics, DocumentTopicsResult, DataUploadResponse, DataUploadConfig, FragmentKey, FragmentCollection } from './types';
-import { isArray, isUndefined } from 'util';
+import { LyticsAccount, DataStream, DataStreamField, TableSchema, TableSchemaField, TableSchemaFieldInfo, Query, CollectResultInfo, SegmentCollection, Segment, Campaign, CampaignVariation, ContentClassification, CampaignVariationDetailOverride, Topic, TopicUrlCollection, Subscription, WebhookConfig, CreateAccessTokenConfig, LyticsAccessToken, TokenScope, LyticsAccountSetting, DocumentTopics, DocumentTopicsResult, DataUploadResponse, DataUploadConfig, FragmentKey, FragmentCollection, SegmentMLModel, CreateSegmentMLModelConfig } from './types';
+import { isArray, isUndefined, isNullOrUndefined } from 'util';
 import { URL } from 'url';
 
 export class LyticsClientOptions {
@@ -737,5 +737,58 @@ export class LyticsClient {
             fragments = undefined;
         }
         return Promise.resolve(fragments);
+    }
+    async getSegmentMLModels() : Promise<SegmentMLModel[]> {
+        const url = `${this.base_url}/api/segmentml`;
+        const models = await this.doGet(url);
+        return Promise.resolve(models);
+    }
+    async getSegmentMLModel(id: string) : Promise<SegmentMLModel | undefined> {
+        if (this.isNullOrWhitespace(id)) {
+            throw new Error('Required parameter is missing.');
+        }
+        const url = `${this.base_url}/api/segmentml/${id}`;
+        return this.doGet(url)
+            .catch(err => {
+                if (err.response.status === 404) {
+                    return Promise.resolve(undefined);
+                }
+                else if(err.response.status === 500 && err.response.message === 'Could not fetch segment model') {
+                    return Promise.resolve(undefined);
+                }
+                throw err;
+            });
+    }
+    async createSegmentMLModel(config:CreateSegmentMLModelConfig): Promise<SegmentMLModel | undefined> {
+        if (!config || this.isNullOrWhitespace(config.source) || this.isNullOrWhitespace(config.target)) {
+            throw new Error('Required parameter is missing.');
+        }
+        const url = `${this.base_url}/api/segmentml`;
+        const model = await this.doPost(url, config);
+        return Promise.resolve(model);
+    }
+    async deleteSegmentMLModel(id: string) : Promise<boolean> {
+        if (this.isNullOrWhitespace(id)) {
+            throw new Error('Required parameter is missing.');
+        }
+        //
+        //remove the generation number from the model
+        //name if it was included (all::smt_active::2)
+        const parts = id.split('::');
+        if (parts.length == 3) {
+            id = parts.splice(0, 2).join('::');    
+        }
+        const url = `${this.base_url}/api/segmentml/${id}`;
+        var result = await this.doDelete(url)
+            .catch(err => {
+                if (err.response.status === 404) {
+                    return Promise.resolve(false);
+                }
+                throw err;
+            });
+        if (isNullOrUndefined(result)) {
+            result = true;
+        }
+        return Promise.resolve(result);
     }
 }

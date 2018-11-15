@@ -1,6 +1,6 @@
 import { LyticsClient, LyticsClientOptions } from '../LyticsClient';
 import { assert } from 'chai';
-import { TableSchemaFieldInfo, CollectResultInfo, WebhookConfig, CreateAccessTokenConfig, LyticsAccessTokenReader, LyticsAccessTokenConfig, DataUploadConfig, Fragment, FragmentCollection, FragmentKey, FragmentHashManager } from '../types';
+import { TableSchemaFieldInfo, CollectResultInfo, WebhookConfig, CreateAccessTokenConfig, LyticsAccessTokenReader, LyticsAccessTokenConfig, DataUploadConfig, Fragment, FragmentCollection, FragmentKey, FragmentHashManager, SegmentMLModelConfig, CreateSegmentMLModelConfig } from '../types';
 import { URL } from 'url';
 import { isArray } from 'util';
 const settings = require('./settings');
@@ -977,6 +977,94 @@ describe('uploadData', function () {
         assert.equal(result.message_count, data.length);
         assert.equal(result.rejected_count, 0);
     });
+});
+describe('getSegmentMLModels', function () {
+    it('should return an array of models', async function () {
+        const lytics = new LyticsClient(apikey);
+        const models = await lytics.getSegmentMLModels();
+        assert.isDefined(models);
+        assert.isTrue(isArray(models));
+    });
+});
+
+describe('getSegmentMLModel', function () {
+    it('should return undefined if an invalid id is used', async function () {
+        const id = 'xxxx';
+        const lytics = new LyticsClient(apikey);
+        const model = await lytics.getSegmentMLModel(id);
+        assert.isUndefined(model);
+    });
+    it('should return a model when a valid id is used', async function () {
+        const id = 'smt_new::smt_active';
+        const lytics = new LyticsClient(apikey);
+        const model = await lytics.getSegmentMLModel(id);
+        assert.isDefined(model);
+        assert.isDefined(model!.conf);
+        assert.isDefined(model!.conf!.source);
+        assert.isDefined(model!.conf!.source!.slug_name);
+        assert.isDefined(model!.conf!.target);
+        assert.isDefined(model!.conf!.target!.slug_name);
+        assert.equal(`${model!.conf!.source!.slug_name}::${model!.conf!.target!.slug_name}`, id);
+    });
+});
+
+describe('createSegmentMLModel', function () {
+    it('should return a model when valid parameters are used', async function () {
+        const lytics = new LyticsClient(apikey);
+        const config = new CreateSegmentMLModelConfig();
+        config.source = "all";
+        config.target = "smt_active";
+        config.use_scores = true;
+        const model = await lytics.createSegmentMLModel(config);
+        assert.isDefined(model);
+    });
+    it('should throw an error if the source segment is too small', async function () {
+        const lytics = new LyticsClient(apikey);
+        const config = new CreateSegmentMLModelConfig();
+        config.source = "smt_new";
+        config.target = "smt_active";
+        config.use_scores = true;
+        try {
+            const model = await lytics.createSegmentMLModel(config);
+            assert.isTrue(false);
+        }
+        catch(err) {
+            assert.isTrue(true);
+        }
+    });
+    it('should throw an error if the target segment is too small', async function () {
+        const lytics = new LyticsClient(apikey);
+        const config = new CreateSegmentMLModelConfig();
+        config.source = "smt_active";
+        config.target = "smt_new";
+        config.use_scores = true;
+        try {
+            const model = await lytics.createSegmentMLModel(config);
+            assert.isTrue(false);
+        }
+        catch(err) {
+            assert.isTrue(true);
+        }
+    });
+});
+
+describe('createSegmentMLModel', function () {
+    it('should delete the model when the generation number is included', async function () {
+        const lytics = new LyticsClient(apikey);
+        const result = await lytics.deleteSegmentMLModel('all::smt_active::2');
+        assert.isTrue(result);
+    });
+    it('should delete the model when no generation number is included', async function () {
+        const lytics = new LyticsClient(apikey);
+        const result = await lytics.deleteSegmentMLModel('all::smt_active');
+        assert.isTrue(result);
+    });
+    it('should throw an error when the model does not exist', async function () {
+        const lytics = new LyticsClient(apikey);
+        const result = await lytics.deleteSegmentMLModel('xxx::yyy');
+        assert.isFalse(result);
+    });
+
 });
 
 describe('getFragments', function () {
