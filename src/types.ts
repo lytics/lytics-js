@@ -677,6 +677,20 @@ export class DOT {
     }
 }
 export class SegmentMLModel {
+    public static getModelGeneration(name: string): number {
+        const parts = name.split('::');
+        if (parts.length == 3) {
+            return parseInt(parts[2]);
+        }
+        return 0;
+    }
+    public static getModelNameWithoutGeneration(name: string): string {
+        const parts = name.split('::');
+        if (parts.length == 3) {
+            name = parts.splice(0, 2).join('::');    
+        }
+        return name;
+    }
     name: string | undefined;
     state: string | undefined;
     reason: string | undefined;

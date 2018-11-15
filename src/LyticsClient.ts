@@ -767,18 +767,12 @@ export class LyticsClient {
         const model = await this.doPost(url, config);
         return Promise.resolve(model);
     }
-    async deleteSegmentMLModel(id: string) : Promise<boolean> {
-        if (this.isNullOrWhitespace(id)) {
+    async deleteSegmentMLModel(name: string) : Promise<boolean> {
+        if (this.isNullOrWhitespace(name)) {
             throw new Error('Required parameter is missing.');
         }
-        //
-        //remove the generation number from the model
-        //name if it was included (all::smt_active::2)
-        const parts = id.split('::');
-        if (parts.length == 3) {
-            id = parts.splice(0, 2).join('::');    
-        }
-        const url = `${this.base_url}/api/segmentml/${id}`;
+        name = SegmentMLModel.getModelNameWithoutGeneration(name);
+        const url = `${this.base_url}/api/segmentml/${name}`;
         var result = await this.doDelete(url)
             .catch(err => {
                 if (err.response.status === 404) {
