@@ -676,3 +676,47 @@ export class DOT {
         return str;
     }
 }
+export class SegmentMLModel {
+    name: string | undefined;
+    state: string | undefined;
+    reason: string | undefined;
+    created: Date | undefined;
+    conf: SegmentMLModelConfig | undefined;
+}
+export class SegmentMLModelConfig {
+    source: SegmentMLModelSegment | undefined;
+    target: SegmentMLModelSegment | undefined;
+}
+export class SegmentMLModelSegment {
+    aid: number = 0;
+    account_id: string | undefined;
+    id: string | undefined;
+    short_id: string | undefined;
+    name: string | undefined;
+    kind: string | undefined;
+    is_public: string | undefined;
+    public_name: string | undefined;
+    slug_name: string | undefined;
+    description: string | undefined;
+    table: string | undefined;
+    author_id: string | undefined;
+    updated: Date | undefined;
+    created: Date | undefined;
+    invalid: boolean = false;
+    invalid_reason: string | undefined;
+    deleted: boolean = false;
+    datemath_calc: boolean = false;
+    forward_datemath: boolean = false;
+    save_hist: boolean = false;
+    schedule_exit: boolean = false;
+    segment_ql: string | undefined;
+    tags: string[] = [];
+    ast: any;
+}
+export class CreateSegmentMLModelConfig {
+    source: string | undefined;
+    target: string | undefined;
+    use_scores: boolean = false;
+    aspect_collections: string[] = [];
+    additional_fields: string[] = [];
+}
