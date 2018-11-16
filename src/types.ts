@@ -696,6 +696,29 @@ export class SegmentMLModel {
     reason: string | undefined;
     created: Date | undefined;
     conf: SegmentMLModelConfig | undefined;
+    features: SegmentMLModelFeature[] = [];
+    summary: SegmentMLSummary | undefined;
+}
+export class SegmentMLSummary {
+    conf: SegmentMLSummaryConfig | undefined;
+    mse: number = 0;
+    rsq: number = 0;
+    success: any;
+    fail: any;
+    auc: number = 0;
+    threshold: number = 0;
+}
+export class SegmentMLSummaryConfig {
+    FalsePositive: number = 0;
+    TruePositive: number = 0;
+    FalseNegative: number = 0;
+    TrueNegative: number = 0;
+}
+export class SegmentMLModelFeature {
+    kind: string | undefined;
+    type: string | undefined;
+    importance: number = 0;
+    correlation: number = 0;
 }
 export class SegmentMLModelConfig {
     source: SegmentMLModelSegment | undefined;
