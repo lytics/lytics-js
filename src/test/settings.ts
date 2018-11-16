@@ -1,4 +1,4 @@
 module.exports = Object.freeze({
-    lytics_apikey: "OrGlfS4tthL79IOPtHihGQxx",
-    lytics_aid: 2700
+    lytics_apikey: '',
+    lytics_aid: 0
 })
