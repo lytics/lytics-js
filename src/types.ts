@@ -713,10 +713,29 @@ export class SegmentMLSummaryConfig {
     TruePositive: number = 0;
     FalseNegative: number = 0;
     TrueNegative: number = 0;
+    public static getModelFuzziness(config: SegmentMLSummaryConfig): number {
+        if (config.TrueNegative === 0 && config.TruePositive === 0) {
+            return 0;
+        }
+        return (config.FalseNegative + config.FalsePositive)/(config.FalseNegative + config.FalsePositive + config.TrueNegative + config.TruePositive);
+    }
+    public static getFalsePositiveRate(config: SegmentMLSummaryConfig): number {
+        if (config.TrueNegative === 0) {
+            return 0;
+        }
+        return config.FalsePositive/config.TrueNegative;
+    }
+    public static getFalseNegativeRate(config: SegmentMLSummaryConfig): number {
+        if (config.FalseNegative === 0 && config.TruePositive === 0) {
+            return 0;
+        }
+        return config.FalseNegative/(config.FalseNegative + config.TruePositive);
+    }
 }
 export class SegmentMLModelFeature {
     kind: string | undefined;
     type: string | undefined;
+    name: string | undefined;
     importance: number = 0;
     correlation: number = 0;
 }
