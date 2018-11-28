@@ -169,7 +169,7 @@ export class CollectResultInfo {
     timestamp_field: string | undefined;
     filename: string | undefined;
 }
-export class SegmentCollection {
+export class SegmentGrouping {
     audiences: Segment[] = [];
     characteristics: Segment[] = [];
     unidentified: Segment[] = [];
@@ -200,6 +200,25 @@ export class Segment {
     tags: string[] = [];
     updated: string | undefined;
 };
+export class SegmentCollectionMember {
+    id: string | undefined;
+    order: number = 0;
+}
+export class SegmentCollection {
+    aid: number = 0;
+    account_id: string | undefined;
+    id: string | undefined;
+    name: string | undefined;
+    slug_name: string | undefined;
+    kind: string | undefined;
+    table: string | undefined;
+    author_id: string | undefined;
+    updated: Date | undefined;
+    created: Date | undefined;
+    internal: boolean = false;
+    collection: SegmentCollectionMember[] = [];
+    parent_segment: string | undefined;
+}
 
 export class Campaign {
     id: string | undefined;

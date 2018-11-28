@@ -288,10 +288,10 @@ describe('collect', function () {
     });
 });
 
-describe('getSegmentCollection', function () {
+describe('getSegmentGroup', function () {
     it('should get all segments when no parameter is specified', async function () {
         const lytics = new LyticsClient(apikey);
-        const segments = await lytics.getSegmentCollection();
+        const segments = await lytics.getSegmentGrouping();
         assert.isDefined(segments);
         assert.isDefined(segments.audiences);
         assert.isDefined(segments.characteristics);
@@ -299,7 +299,7 @@ describe('getSegmentCollection', function () {
     });
     it('should get 1 segment when only 1 segment is specified', async function () {
         const lytics = new LyticsClient(apikey);
-        const segments = await lytics.getSegmentCollection(['fcfb11e24b93964cba3aa2527ab913a3']);
+        const segments = await lytics.getSegmentGrouping(['fcfb11e24b93964cba3aa2527ab913a3']);
         assert.isDefined(segments);
         assert.isDefined(segments.audiences);
         assert.equal(segments.audiences.length, 1);
@@ -310,7 +310,7 @@ describe('getSegmentCollection', function () {
     });
     it('should get 0 segment when a segment is specified that does not exist', async function () {
         const lytics = new LyticsClient(apikey);
-        const segments = await lytics.getSegmentCollection(['aaaaa']);
+        const segments = await lytics.getSegmentGrouping(['aaaaa']);
         assert.isDefined(segments);
         assert.isDefined(segments.audiences);
         assert.equal(segments.audiences.length, 0);
@@ -347,6 +347,35 @@ describe('getSegment', function () {
         const segment = await lytics.getSegment('fcfb11e24b93964cba3aa2527ab913a3');
         assert.isDefined(segment);
         assert.equal(segment!.id, 'fcfb11e24b93964cba3aa2527ab913a3');
+    });
+});
+
+describe('getSegmentCollections', function () {
+    it('should get all segment collections', async function () {
+        const lytics = new LyticsClient(apikey);
+        const collections = await lytics.getSegmentCollections();
+        assert.isDefined(collections);
+        assert.isTrue(collections.length > 0);
+    });
+});
+
+describe('getSegmentCollection', function () {
+    it('should get undefined is the value specified does not match an existing segment collection', async function () {
+        const lytics = new LyticsClient(apikey);
+        const collection = await lytics.getSegmentCollection('asdasd');
+        assert.isUndefined(collection);
+    });
+    it('should get the segment collection by slug', async function () {
+        const lytics = new LyticsClient(apikey);
+        const collection = await lytics.getSegmentCollection('segmentation_email_capture');
+        assert.isDefined(collection);
+        assert.equal(collection!.slug_name, 'segmentation_email_capture');
+    });
+    it('should get the segment collection by id', async function () {
+        const lytics = new LyticsClient(apikey);
+        const collection = await lytics.getSegmentCollection('00d8698ed83dc7edf6e9e31c77a60e74');
+        assert.isDefined(collection);
+        assert.equal(collection!.id, '00d8698ed83dc7edf6e9e31c77a60e74');
     });
 });
 

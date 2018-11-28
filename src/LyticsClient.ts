@@ -1,7 +1,7 @@
 'use strict';
 import axios, { AxiosRequestConfig, } from 'axios';
 import qs = require('query-string');
-import { LyticsAccount, DataStream, DataStreamField, TableSchema, TableSchemaField, TableSchemaFieldInfo, Query, CollectResultInfo, SegmentCollection, Segment, Campaign, CampaignVariation, ContentClassification, CampaignVariationDetailOverride, Topic, TopicUrlCollection, Subscription, WebhookConfig, CreateAccessTokenConfig, LyticsAccessToken, TokenScope, LyticsAccountSetting, DocumentTopics, DocumentTopicsResult, DataUploadResponse, DataUploadConfig, FragmentKey, FragmentCollection, SegmentMLModel, CreateSegmentMLModelConfig } from './types';
+import { LyticsAccount, DataStream, DataStreamField, TableSchema, TableSchemaField, TableSchemaFieldInfo, Query, CollectResultInfo, SegmentGrouping, Segment, Campaign, CampaignVariation, ContentClassification, CampaignVariationDetailOverride, Topic, TopicUrlCollection, Subscription, WebhookConfig, CreateAccessTokenConfig, LyticsAccessToken, TokenScope, LyticsAccountSetting, DocumentTopics, DocumentTopicsResult, DataUploadResponse, DataUploadConfig, FragmentKey, FragmentCollection, SegmentMLModel, CreateSegmentMLModelConfig, SegmentCollection } from './types';
 import { isArray, isUndefined, isNullOrUndefined } from 'util';
 import { URL } from 'url';
 
@@ -301,8 +301,8 @@ export class LyticsClient {
             });
         return Promise.resolve(segment);
     }
-    async getSegmentCollection(ids?: string[]): Promise<SegmentCollection> {
-        const col = new SegmentCollection();
+    async getSegmentGrouping(ids?: string[]): Promise<SegmentGrouping> {
+        const col = new SegmentGrouping();
         const url = `${this.base_url}/api/segment`;
         const segments = await this.doGet(url) as Segment[];
         if (!segments) {
@@ -328,6 +328,29 @@ export class LyticsClient {
         }
         return Promise.resolve(col);
     }
+    async getSegmentCollections(): Promise<SegmentCollection[]> {
+        const url = `${this.base_url}/api/segmentcollection`;
+        const collections = await this.doGet(url) as SegmentCollection[];
+        if (!collections) {
+            return Promise.resolve([]);
+        }
+        return Promise.resolve(collections);
+    }
+    async getSegmentCollection (idOrSlug: string): Promise<SegmentCollection | undefined> {
+        if (this.isNullOrWhitespace(idOrSlug)) {
+            throw new Error('Required parameter is missing.');
+        }
+        const url = `${this.base_url}/api/segmentcollection/${idOrSlug}`;
+        const collection = await this.doGet(url)
+            .catch(err => {
+                if (err.response.status === 404) {
+                    return;
+                }
+                throw err;
+            });
+        return Promise.resolve(collection);
+    }
+
     private isNullOrWhitespace(value?: string): boolean {
         return (!value || value.trim().length == 0);
     }
