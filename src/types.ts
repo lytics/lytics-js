@@ -774,6 +774,18 @@ export class CreateSegmentMLModelConfig {
     source: string | undefined;
     target: string | undefined;
     use_scores: boolean = false;
+    target_field: string | undefined;
+    use_content: boolean = false;
     aspect_collections: string[] = [];
     additional_fields: string[] = [];
+    model_only: boolean = true;
+    eval_only: boolean = false;
+    tune_model: boolean = false;
+    write_to_gcs: boolean = false;
+    tags: string[] = [];
+    re_run: boolean = false;
+    save_segments: boolean = false;
+    as_is: boolean = false;
+    num_to_train: number | undefined;
+    cor_threshold: number | undefined;
 }
