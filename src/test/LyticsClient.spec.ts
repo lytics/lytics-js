@@ -235,6 +235,21 @@ describe('upsertQuery', function () {
     });
 });
 
+describe('validateQuery', function () {
+    it('validation fails with invalid LQL', async function () {
+        const lytics = new LyticsClient(apikey);
+        const lql = 'SELECT email(`email) AS email FROM test INTO user BY email ALIAS test';
+        let result = await lytics.validateQuery(lql);
+        assert.isFalse(result.success);
+    });
+    it('validation is successful with valid LQL', async function () {
+        const lytics = new LyticsClient(apikey);
+        const lql = 'SELECT email(`email`) AS email FROM test INTO user BY email ALIAS test';
+        let result = await lytics.validateQuery(lql);
+        assert.isTrue(result.success);
+    });
+});
+
 describe('getQueriesGroupedByTable', function () {
     it('gets a map of the queries', async function () {
         const lytics = new LyticsClient(apikey);

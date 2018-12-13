@@ -131,7 +131,11 @@ export class TableSchemaFieldInfoTermCount {
     value: string | undefined;
     count: number = 0;
 }
-
+export class QueryValidationResult {
+    success: boolean = true;
+    message: string | undefined;
+    query: Query | undefined;
+}
 export class Query {
     alias: string | undefined;
     by_fields: string[] = [];
@@ -147,7 +151,6 @@ export class Query {
     table: string | undefined;
     text: string | undefined;
     updated: string | undefined;
-
 }
 export class QueryField {
     as: string | undefined;

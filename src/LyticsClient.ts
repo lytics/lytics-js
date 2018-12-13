@@ -1,7 +1,7 @@
 'use strict';
 import axios, { AxiosRequestConfig, } from 'axios';
 import qs = require('query-string');
-import { LyticsAccount, DataStream, DataStreamField, TableSchema, TableSchemaField, TableSchemaFieldInfo, Query, CollectResultInfo, SegmentGrouping, Segment, Campaign, CampaignVariation, ContentClassification, CampaignVariationDetailOverride, Topic, TopicUrlCollection, Subscription, WebhookConfig, CreateAccessTokenConfig, LyticsAccessToken, TokenScope, LyticsAccountSetting, DocumentTopics, DocumentTopicsResult, DataUploadResponse, DataUploadConfig, FragmentKey, FragmentCollection, SegmentMLModel, CreateSegmentMLModelConfig, SegmentCollection } from './types';
+import { LyticsAccount, DataStream, DataStreamField, TableSchema, TableSchemaField, TableSchemaFieldInfo, Query, CollectResultInfo, SegmentGrouping, Segment, Campaign, CampaignVariation, ContentClassification, CampaignVariationDetailOverride, Topic, TopicUrlCollection, Subscription, WebhookConfig, CreateAccessTokenConfig, LyticsAccessToken, TokenScope, LyticsAccountSetting, DocumentTopics, DocumentTopicsResult, DataUploadResponse, DataUploadConfig, FragmentKey, FragmentCollection, SegmentMLModel, CreateSegmentMLModelConfig, SegmentCollection, QueryValidationResult } from './types';
 import { isArray, isUndefined, isNullOrUndefined } from 'util';
 import { URL } from 'url';
 
@@ -229,6 +229,22 @@ export class LyticsClient {
         }
         return Promise.resolve(false);
     }
+    async validateQuery(lql: string): Promise<QueryValidationResult> {
+        if (this.isNullOrWhitespace(lql)) {
+            throw new Error('Required parameter is missing.');
+        }
+        const url = `${this.base_url}/api/query/_validate`;
+        const result = new QueryValidationResult();
+        const response = await this.doPost(url, lql)
+            .catch(err => {
+                result.success = false;
+                result.message = err.response.data.message;
+            });
+        if (result.success) {
+            result.query = response[0];
+        }
+        return Promise.resolve(result);
+    }
     async getQueriesGroupedByTable(): Promise<Map<string, Query[]>> {
         const queries = await this.getQueries();
         let map: Map<string, Query[]> = new Map();
@@ -336,7 +352,7 @@ export class LyticsClient {
         }
         return Promise.resolve(collections);
     }
-    async getSegmentCollection (idOrSlug: string): Promise<SegmentCollection | undefined> {
+    async getSegmentCollection(idOrSlug: string): Promise<SegmentCollection | undefined> {
         if (this.isNullOrWhitespace(idOrSlug)) {
             throw new Error('Required parameter is missing.');
         }
@@ -599,8 +615,8 @@ export class LyticsClient {
             });
         return Promise.resolve(true);
     }
-    
-    async getTokenScopes() : Promise<TokenScope[]> {
+
+    async getTokenScopes(): Promise<TokenScope[]> {
         return Promise.resolve(TokenScope.supportedScopes);
     }
 
@@ -663,7 +679,7 @@ export class LyticsClient {
         return Promise.resolve(false);
     }
 
-    async getAccountSettings() : Promise<LyticsAccountSetting[]> {
+    async getAccountSettings(): Promise<LyticsAccountSetting[]> {
         const url = `${this.base_url}/api/account/setting`;
         const settings = await this.doGet(url);
         return Promise.resolve(settings);
@@ -683,7 +699,7 @@ export class LyticsClient {
         }
         return Promise.resolve(map);
     }
-    async getAccountSetting(slug: string) : Promise<LyticsAccountSetting | undefined> {
+    async getAccountSetting(slug: string): Promise<LyticsAccountSetting | undefined> {
         if (this.isNullOrWhitespace(slug)) {
             throw new Error('Required parameter is missing.');
         }
@@ -696,7 +712,7 @@ export class LyticsClient {
                 throw err;
             });
     }
-    async updateAccountSetting(slug: string, value: any) : Promise<LyticsAccountSetting | undefined> {
+    async updateAccountSetting(slug: string, value: any): Promise<LyticsAccountSetting | undefined> {
         if (this.isNullOrWhitespace(slug) || value === undefined || value === null) {
             throw new Error('Required parameter is missing.');
         }
@@ -709,7 +725,7 @@ export class LyticsClient {
                 throw err;
             });
     }
-    async deleteAccountSetting(slug: string) : Promise<boolean> {
+    async deleteAccountSetting(slug: string): Promise<boolean> {
         if (this.isNullOrWhitespace(slug)) {
             throw new Error('Required parameter is missing.');
         }
@@ -743,14 +759,14 @@ export class LyticsClient {
         }
         return Promise.resolve(result.urls[0]);
     }
-    async uploadData(config:DataUploadConfig, data: any): Promise<DataUploadResponse> {
+    async uploadData(config: DataUploadConfig, data: any): Promise<DataUploadResponse> {
         if (!config || this.isNullOrWhitespace(config.stream) || data === undefined || data === null) {
             throw new Error('Required parameter is missing');
         }
         const url = `${this.base_url}/collect/json/${config.stream}?timestamp_field=${config.timestamp_field}&dryrun=${config.dryrun}`;
         return this.doPost(url, data);
     }
-    async getFragments(table: string, key: string, value: any) : Promise<FragmentCollection | undefined> {
+    async getFragments(table: string, key: string, value: any): Promise<FragmentCollection | undefined> {
         if (this.isNullOrWhitespace(table) || this.isNullOrWhitespace(key) || this.isNullOrWhitespace(value)) {
             throw new Error('Required parameter is missing.');
         }
@@ -761,12 +777,12 @@ export class LyticsClient {
         }
         return Promise.resolve(fragments);
     }
-    async getSegmentMLModels() : Promise<SegmentMLModel[]> {
+    async getSegmentMLModels(): Promise<SegmentMLModel[]> {
         const url = `${this.base_url}/api/segmentml`;
         const models = await this.doGet(url);
         return Promise.resolve(models);
     }
-    async getSegmentMLModel(id: string) : Promise<SegmentMLModel | undefined> {
+    async getSegmentMLModel(id: string): Promise<SegmentMLModel | undefined> {
         if (this.isNullOrWhitespace(id)) {
             throw new Error('Required parameter is missing.');
         }
@@ -776,13 +792,13 @@ export class LyticsClient {
                 if (err.response.status === 404) {
                     return Promise.resolve(undefined);
                 }
-                else if(err.response.status === 500 && err.response.message === 'Could not fetch segment model') {
+                else if (err.response.status === 500 && err.response.message === 'Could not fetch segment model') {
                     return Promise.resolve(undefined);
                 }
                 throw err;
             });
     }
-    async createSegmentMLModel(config:CreateSegmentMLModelConfig): Promise<SegmentMLModel | undefined> {
+    async createSegmentMLModel(config: CreateSegmentMLModelConfig): Promise<SegmentMLModel | undefined> {
         if (!config || this.isNullOrWhitespace(config.source) || this.isNullOrWhitespace(config.target)) {
             throw new Error('Required parameter is missing.');
         }
@@ -790,7 +806,7 @@ export class LyticsClient {
         const model = await this.doPost(url, config);
         return Promise.resolve(model);
     }
-    async deleteSegmentMLModel(name: string) : Promise<boolean> {
+    async deleteSegmentMLModel(name: string): Promise<boolean> {
         if (this.isNullOrWhitespace(name)) {
             throw new Error('Required parameter is missing.');
         }
